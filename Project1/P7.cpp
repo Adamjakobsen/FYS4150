@@ -52,15 +52,15 @@ for (int i=0;i<=n_steps;i++)
 double a_b;
 b_tilde[1]=b[1];
 g_tilde[1]=g[1];
-for (int i=2; i<=n;i++)
+for (int i=2; i<n_steps;i++)
 {
 	a_b =  a[i]/b_tilde[i-1];
 	b_tilde[i]=b[i] - a_b*c[i-1];
 	g_tilde[i]=g[i] - a_b*g_tilde[i-1];
 }
-v[n-1]=g_tilde[n-1]/b_tilde[n-1];
+v[n_steps-1]=g_tilde[n_steps-1]/b_tilde[n_steps-1];
 
-for (int i=n-1;i>=1;i--)
+for (int i=n_steps-2;i>0;i--)
 {
 v[i]=(g_tilde[i] - c[i]*v[i+1])/b_tilde[i];
 }
