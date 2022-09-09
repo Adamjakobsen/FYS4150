@@ -72,8 +72,8 @@ std::ofstream ofile;
 ofile.open(filename);
 
 //Format parameters
-int width = 14;
-int prec = 4;
+int width = 18;
+int prec = 10;
 
 
 //Loop and write to file
