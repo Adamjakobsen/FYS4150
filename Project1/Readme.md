@@ -1,9 +1,9 @@
-#Project1
+# Project1
 
 
-##Reproducing results
+## Reproducing results
 
-#Problem 7
+### Problem 7
 For compiling, run the following command in terminal
 
 ```
