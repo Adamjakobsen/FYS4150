@@ -45,7 +45,7 @@ for (std::string mode : modes_vector)
 is a C++11 range-based for loop. So in case g++ or Clang is not using C++11 as default, the compiling command needs to be 
 
 ```
-g++ --std=c++11 problem10_copy.cpp -o problem10
+g++ --std=c++11 problem10.cpp -o problem10
 ```
 
 Then, run the following command for producing the data files with steps up to 10^6
