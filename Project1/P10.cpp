@@ -1,164 +1,89 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include <fstream>
+#include <iomanip>
 #include <cmath>
-#include <algorithm>
 
-using namespace std;
-
-// Some width and precision parameters we will use to format the output
-int width = 12;
-int prec = 4;
-
-string filename = "output_problem10.txt";
-
-double solution(double x)
+int main(int argc, char *argv[])
 {
+    // Number of steps
+    int n_steps = atoi(argv[1]);
 
-    return 1 - (1 - exp(-10)) * x - exp(-10 * x);
-}
+    // Define number of points we want to solve for
+    int n = n_steps + 1;
+    // Number of points in complete solution
+    int m = n + 2;
+    // Set parameters and boundary values
+    double x_min = 0.0;
+    double x_max = 1.0;
+    double h = (x_max - x_min) / n_steps;
 
-vector<double> ThomasAlgorithm(double n, vector<double> g, vector<double> a, vector<double> b, vector<double> c, string mode) // sub, main, super diagonal respectively
-{
-    double m = n - 2; // m is the number of solution points the algorithm gives us
+    double v0 = 0.0;
+    double vm = 0.0;
 
-    vector<double> v(m + 1);
+    // Define vector for complete solution and fill in boudary values
+    std::vector<double> v(n + 1);
+    v[0] = v0;
+    v[n - 1] = vm;
 
-    double g_tilda_i, b_tilda_i, v_i;
+    // Main diagonal vector a of length n
+    std::vector<double> a(n, -1.0);
+    // sub/superdiagonals with length n-1
+    std::vector<double> b(n, 2.0);
+    std::vector<double> c(n, -1.0);
+    // Defining vector g
+    std::vector<double> g(n);
+    std::vector<double> g_tilde(n);
+    // Define vector x
+    std::vector<double> x(n);
+    x[0] = x_min;
 
-    // for loop of forward substitution
-    if (mode == "special")
+    double exp(double x);
+    for (int i = 0; i < n_steps + 1; i++)
     {
-        vector<double> pre_computed_b;
-        for (int i = 1; i < m + 1; i++)
-        {
-            pre_computed_b.push_back((i + 1) / i);
-        }
-
-        for (int i = 1; i < m + 1; i++) // remember g has only m = n - 2 elements and we already have g_0
-        {
-            double omega = 1 / pre_computed_b[i - 1];
-            g_tilda_i = g[i] + (g[i - 1] / pre_computed_b[i - 1]);
-            b_tilda_i = 2 - omega;
-
-            g[i] = g_tilda_i;
-        }
-
-        // solutions limit cases
-        v[m] = (g_tilda_i / b_tilda_i); // since loop is over, push last value instead vector's last entry
-
-        // for loop of back substitution
-        for (int i = m - 1; i >= 0; i--) // m - 1 because we are starting at 0
-        {
-            v_i = (g[i] + (v[i + 1])) / pre_computed_b[i];
-            v[i] = v_i;
-        }
+        x[i] = i * h;
+        g[i] = h * h * 100 * exp(-10 * x[i]);
     }
-    else
+    double a_b;
+
+    g_tilde[1] = g[1];                    /////////// here starts the difference between problem 7 and problem 9
+    std::vector<double> pre_comp_b_tilde; // pre computed b tilde vectors
+    for (int i = 1; i < n + 1, i++)       // notice it has the same dimensions as b
     {
-        for (int i = 1; i < m + 1; i++) // remember g has only m = n - 2 elements and we already have g_0
-        {
-            double omega = a[i] / b[i - 1];
-            g_tilda_i = g[i] - (omega * g[i - 1]);
-            b_tilda_i = b[i] - (omega * c[i - 1]);
+        pre_comp_b_tilde.push_back((i + i) / i)
+    }
+    std::cout << "ASSERT" << b.size() << "/" << pre_comp_b_tilde.size() << std::endl;
 
-            g[i] = g_tilda_i;
-            b[i] = b_tilda_i;
-        }
+    for (int i = 2; i < n_steps; i++)
+    {
+        g_tilde[i] = g[i] + (g_tilde[i - 1] / pre_comp_b_tilde[i - 1]);
+    }
+    v[n_steps - 1] = g_tilde[n - 1] / pre_comp_b_tilde[n - 1];
 
-        // solutions limit cases
-        v[m] = (g_tilda_i / b_tilda_i); // since loop is over, push last value instead vector's last entry
-
-        // for loop of back substitution
-        for (int i = m - 1; i >= 0; i--) // m - 1 because we are starting at 0
-        {
-            v_i = (g[i] - (c[i] * v[i + 1])) / b[i];
-            v[i] = v_i;
-        }
+    for (int i = n - 2; i > 0; i--)
+    {
+        v[i] = (g_tilde[i] - c[i] * v[i + 1]) / pre_comp_b_tilde[i];
     }
 
-    return v;
-}
+    // Set filename
+    std::string filename = "output_problem9_" + std::to_string(n_steps) + ".txt";
 
-vector<double> source_function(double n, vector<double> x_vec)
-{
-    vector<double> f;
-    for (int i = 0; i < n; i++) // notice there will be n iterations
-    {
-        f.push_back(100 * exp(-10 * x_vec[i]));
-    }
-    return f;
-}
-
-int main()
-{
-
-    vector<double> steps_vector{10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000};
-    vector<string> modes_vector{"special", "general"};
-    int repeats = 20;
-    ofstream ofile;
-
+    // Create output file stream
+    std::ofstream ofile;
     ofile.open(filename);
-    for (string mode : modes_vector)
+
+    // Format parameters
+    int width = 18;
+    int prec = 10;
+
+    // Loop and write to file
+    for (int i = 0; i < n_steps + 1; i++)
     {
-        for (int i = 0; i < repeats; i++)
-        {
-            for (double n : steps_vector) // n is for number of steps
-            {
-                double x = 0;
-                double x_min = 0;
-                double x_max = 1;
-
-                vector<double> u_vec;
-                vector<double> x_vec;
-
-                double step = (x_max - x_min) / n;
-
-                for (int i = 0; i < n + 1; i++) // notice there will be n + 1 steps
-                {
-                    x_vec.push_back(x); // notice the order matters for the boundary
-                    x = x + step;
-                }
-
-                vector<double> f = source_function(n, x_vec);
-
-                double m = n - 2;
-                vector<double> a(m, -1.); // # of elements is less than that of the main diag
-                vector<double> c(m, -1.);
-                vector<double> b(m + 1, 2.);
-                vector<double> g(m + 1);
-
-                // limit cases for g
-                g[0] = step * step * f[x_vec[1]];     // + v[0] but recall v[0] = u[0] = 0
-                g[m] = step * step * f[x_vec[m + 1]]; // + v[n-1] but recall v[n-1] = u[n-1] = 0
-                for (int i = 1; i < m; i++)
-                {
-                    g[i] = step * step * f[i + 1];
-                }
-                auto t1 = std::chrono::high_resolution_clock::now();
-                vector<double> v = ThomasAlgorithm(n, g, a, b, c, mode); // notice that this vector has m entries but is it a good idea to fill in the boundary terms
-                auto t2 = chrono::high_resolution_clock::now();
-
-                // fill in vector v
-                v.insert(v.begin(), 0); // pushes 0 to the front of vector
-                v.push_back(0);         // pushes 0 to the end of vector
-
-                // OUTPUT TO FILE
-
-                double duration_seconds = chrono::duration<double>(t2 - t1).count();
-
-                ofile
-                    << setw(width) << setprecision(prec) << scientific << n
-                    << ", "
-                    << setw(width) << setprecision(prec) << scientific << duration_seconds
-                    << ", "
-                    << setw(width) << setprecision(prec) << scientific << mode
-                    << endl;
-            }
-        }
+        ofile << std::setw(width) << std::setprecision(prec) << std::scientific << x[i]
+              << std::setw(width) << std::setprecision(prec) << std::scientific << v[i] << std::endl;
     }
+    // Close the output file
     ofile.close();
-
-    // all is well, return 0
     return 0;
 }
