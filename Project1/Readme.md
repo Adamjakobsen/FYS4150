@@ -30,7 +30,7 @@ For compiling, run the following command in terminal
 g++ P9.cpp -o P9
 ```
 
-Then run the following command for producing the data file with whatever nsteps desired. The example for P9 only contains nsteps = 1000, but multipple can be used similarly to what was done in P7
+Then run the following command for producing the data file with whatever nsteps desired. The example for P9 only contains nsteps = 1000, but multiple can be used similarly to what was done in P7
 
 ```
 for nsteps in 1000; do ./P9 $nsteps; done
