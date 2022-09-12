@@ -38,18 +38,31 @@ for nsteps in 1000; do ./P9 $nsteps; done
 
 
 ### Problem 10
-OBS: the iteration 
+OBS: the iteration in line 16
 ```
 for (std::string mode : modes_vector)
 ```
 is a C++11 range-based for loop. So in case g++ or Clang is not using C++11 as default, the compiling command needs to be 
 
 ```
-g++ --std=c++11 problem10.cpp -o problem10
+g++ --std=c++11 P10.cpp -o P10
+```
+
+In case C++ is already default, for compliling and linking simply run the default
+
+```
+g++ P10.cpp -o P10
 ```
 
 Then, run the following command for producing the data files with steps up to 10^6
 
 ```
-for nsteps in 10 100 1000 10000 100000 1000000 ; do ./P10 $nsteps; done
+for nsteps in 10 50 100 500 1000 5000 10000 50000 100000 500000 1000000 ; do ./P10 $nsteps; done
+```
+
+This command will generate 1 .txt file for each nstep, for each algorithm used.
+For plotting the result graph in a pdf file then run 
+
+```
+python3 Plot_P10.py
 ```
