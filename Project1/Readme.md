@@ -3,7 +3,7 @@
 
 ## Reproducing results
 
-### Problem 7
+### Problem 2
 For compiling, run the following command in terminal
 
 ```
