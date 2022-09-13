@@ -1,9 +1,14 @@
 # Project1
 
+Before anything else, it is important to have all used libraries installed. Make sure of that by running 
+
+```
+pip install numpy matplotlib 
+```
 
 ## Reproducing results
 
-### Problem 7
+### Problem 2
 For compiling, run the following command in terminal
 
 ```
@@ -49,11 +54,20 @@ OBS: Before compiling problem 8, we need to re-execute P7 with more input steps 
 for nsteps in 10 100 1000 10000 100000 1000000 10000000 ; do ./P7 $nsteps; done
 ```
 
-now we can properly plot the data from problem 8 as follows
+now, to obtain the plots for parts "a" and "b" of the problem we run the command
 
 ```
-python3 Plot_P8.py
+python3 Plot_P8.py 3
 ```
+
+The input argument refers to the greatest power of 10 contained in the array of number of steps.
+Therefore, to obtain the plot for parts "c" we run the command
+
+```
+python3 Plot_P8.py 7
+```
+
+OBS: it can take minutes to plot the dataset containing 10^7 steps.
 
 ### Problem 9
 
