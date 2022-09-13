@@ -7,6 +7,25 @@
 For compiling, run the following command in terminal
 
 ```
+g++ P2.cpp -o P2
+```
+
+Then run the following command for producing the data file
+
+```
+./P2
+```
+
+and finally for plotting the results run 
+
+```
+python3 Plot_P2.py
+```
+
+### Problem 7
+For compiling, run the following command in terminal
+
+```
 g++ P7.cpp -o P7
 ```
 
@@ -20,6 +39,20 @@ and finally for plotting the results run
 
 ```
 python3 Plot_P7.py 10 100 1000
+```
+
+### Problem 8
+
+OBS: Before compiling problem 8, we need to re-execute P7 with more input steps as below
+
+```
+for nsteps in 10 100 1000 10000 100000 1000000 10000000 ; do ./P7 $nsteps; done
+```
+
+now we can properly plot the data from problem 8 as follows
+
+```
+python3 Plot_P8.py
 ```
 
 ### Problem 9
