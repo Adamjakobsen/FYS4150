@@ -30,10 +30,16 @@ int main()
     arma::mat norm_eigvec = normalise(eigvec); // normalized matrix of eigenvectors
 
     // realize we can check all at once
-    for (int i = 0; i < N; i++)
-    {
-        arma::mat left_side = A * eigvec.col(i);
-        arma::mat rigt_side = eigval(i) * eigvec.col(i);
-        std::cout << left_side - rigt_side << '\n';
-    }
+    arma::mat mat_of_eivals = arma::diagmat(eigval);
+
+    arma::mat left_side = A * norm_eigvec;
+    arma::mat rigt_side = norm_eigvec * mat_of_eivals;
+
+    std::cout << left_side - rigt_side << '\n';
+
+    // int check_col = 3;
+    // arma::vec check1 = A * eigvec.col(check_col);
+    // arma::vec check2 = eigval(check_col) * eigvec.col(check_col);
+    // arma::vec final = check1 - check2;
+    //  std::cout << final << '\n';
 }
