@@ -3,7 +3,26 @@
 
 #include <armadillo>
 
-double max_offdiag_symmetric(arma::mat A, int N, int &k, int &l)
+const double PI = atan(1.0) * 4.;
+
+double check_analytical_eval(int i, int N, double a, double d)
+{
+
+    double lambda_i = d + 2 * a * cos((i + 1) * PI / (N + 1));
+    return lambda_i;
+}
+
+arma::vec check_analytical_evec(int i, int N)
+{
+    arma::vec evec_i = arma::vec(N).fill(1.);
+    for (int j = 0; j < N; j++)
+    {
+        evec_i(j) = sin((i + 1) * (j + 1) * PI / (N + 1));
+    }
+    return evec_i;
+}
+
+double max_offdiag_symmetric(arma::mat &A, int N, int &k, int &l)
 {
     // we will call this funtion multiple times so it is important to always reinitialize since we passed the memory address
     k = 0;
@@ -24,7 +43,7 @@ double max_offdiag_symmetric(arma::mat A, int N, int &k, int &l)
     return A(k, l);
 }
 
-arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10, -1))
+arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10, -8))
 {
     // step 1 - initialization
     // we have defined epsilon and passed A. Now we need R
@@ -38,12 +57,9 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10,
     double a_k_k, a_i_k, r_i_k; // temporary variables
 
     // safety net
-    int count = 0;
 
     while (abs(max) > epsilon)
     {
-        count += 1;
-
         // 3.1
         tau = (A(l, l) - A(k, k)) / (2 * max);
 
@@ -55,7 +71,7 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10,
         // 3.3
         a_k_k = A(k, k); // save before update
         A(k, k) = A(k, k) * c * c - 2 * A(k, l) * c * s + A(l, l) * s * s;
-        A(k, k) = A(l, l) * c * c + 2 * A(k, l) * c * s + a_k_k * s * s; ///////////////// EXTRA CAREFUL HERE
+        A(l, l) = A(l, l) * c * c + 2 * A(k, l) * c * s + a_k_k * s * s; ///////////////// EXTRA CAREFUL HERE
         A(k, l) = 0;
         A(l, k) = 0;
 
@@ -91,17 +107,46 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10,
 int main()
 {
     // Below is the test matrix
-    int N = 4; // dim of square matrix
+    int N = 6;     // dim of square matrix
+    int n = N + 1; // steps
+    double h = 1. / n;
+    // initialising v that I will be solving for
+    // giving it a dummy first index
+    // it lacks the last boundary condition index
+    // fill in vector with 1's just to know what's up
+    arma::vec v = arma::vec(N).fill(1.);
+    v(0) = 0.;
+
+    double a = -1 / (h * h);
+    double d = 2 / (h * h);
+
     arma::mat A = arma::mat(N, N).fill(0.);
-    // sets up the test matrix
-    A.diag() = arma::vec(N).fill(1);
-    A(1, 2) = -0.7;
-    A(2, 1) = -0.7;
-    A(0, 3) = 0.5;
-    A(3, 0) = 0.5;
+    // sets up the tridiagonal
+    A.diag() = arma::vec(N).fill(d);
+    A.diag(1) = arma::vec(N - 1).fill(a);
+    A.diag(-1) = arma::vec(N - 1).fill(a);
+
+    // TEST
+    arma::vec eigval; // vector of eigenvalues
+    arma::mat eigvec; // matrix of eigenvectors
+    eig_sym(eigval, eigvec, A);
+    std::cout << __LINE__ << eigval << std::endl;
+    //
 
     int k = 0;
     int l = 1;
     arma::mat diag_A = jacobi(A, k, l, N);
     std::cout << diag_A << std::endl;
+    // checking the eigenvalues
+    for (int i = 0; i < N; i++)
+    {
+        double analytical_eval_i = check_analytical_eval(i, N, a, d);
+        double diff = diag_A(i, i) - analytical_eval_i;
+
+        std::cout << "analytical " << analytical_eval_i << std::endl;
+
+        std::cout << "jacobi " << diag_A(i, i) << std::endl;
+
+        std::cout << "analytical - jacobi EVAL " << i << " | " << diff << std::endl;
+    }
 }
