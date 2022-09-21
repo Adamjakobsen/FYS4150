@@ -149,4 +149,5 @@ int main()
 
         std::cout << "analytical - jacobi EVAL " << i << " | " << diff << std::endl;
     }
+    return 0;
 }
