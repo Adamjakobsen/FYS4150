@@ -3,23 +3,32 @@
 
 #include <armadillo>
 
-const double PI = atan(1.0) * 4.;
+const double PI = 4. * atan(1.);
 
-double check_analytical_eval(int i, int N, double a, double d)
+arma::vec check_analytical_eval(int N, double a, double d)
 {
+    arma::vec evals_vec = arma::vec(N).fill(1.);
 
-    double lambda_i = d + 2 * a * cos((i + 1) * PI / (N + 1));
-    return lambda_i;
+    for (int i = 0; i < N; i++)
+    {
+        evals_vec(i) = d + 2 * a * cos((i + 1) * PI / (N + 1));
+    }
+
+    return evals_vec;
 }
 
-arma::vec check_analytical_evec(int i, int N)
+arma::mat check_analytical_evec(int N, arma::mat evecs_mat, double a)
 {
-    arma::vec evec_i = arma::vec(N).fill(1.);
-    for (int j = 0; j < N; j++)
+    arma::vec evec_i;
+    for (int i = 0; i < N; i++)
     {
-        evec_i(j) = sin((i + 1) * (j + 1) * PI / (N + 1));
+        for (int j = 0; j < N; j++)
+        {
+            evecs_mat(i, j) = sin((i + 1.) * (j + 1.) * PI / (N + 1.));
+        }
     }
-    return evec_i;
+
+    return evecs_mat;
 }
 
 double max_offdiag_symmetric(arma::mat &A, int N, int &k, int &l)
@@ -32,7 +41,7 @@ double max_offdiag_symmetric(arma::mat &A, int N, int &k, int &l)
     {
         for (int j = i + 1; j <= N - 1; j++)
         {
-            if (abs(A(i, j)) >= abs(A(k, l)))
+            if (std::abs(A(i, j)) >= std::abs(A(k, l)))
             {
                 k = i;
                 l = j;
@@ -43,7 +52,7 @@ double max_offdiag_symmetric(arma::mat &A, int N, int &k, int &l)
     return A(k, l);
 }
 
-arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10, -8))
+arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsilon = std::pow(10, -8))
 {
     // step 1 - initialization
     // we have defined epsilon and passed A. Now we need R
@@ -56,9 +65,7 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10,
     double tau, t, c, s;
     double a_k_k, a_i_k, r_i_k; // temporary variables
 
-    // safety net
-
-    while (abs(max) > epsilon)
+    while (std::abs(max) > epsilon)
     {
         // 3.1
         tau = (A(l, l) - A(k, k)) / (2 * max);
@@ -101,21 +108,23 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, double epsilon = std::pow(10,
         // 3.5 find the big chungus again
         max = max_offdiag_symmetric(A, N, k, l);
     }
-    return A; // this is after the loop so this matrix is ready to eat
+
+    if (ask == "val")
+    {
+        return A; // this is after the loop so this matrix is ready to eat
+    }
+    else
+    {
+        return R;
+    }
 }
 
 int main()
 {
     // Below is the test matrix
-    int N = 6;     // dim of square matrix
+    int N = 6;     // dim of sqr matrix
     int n = N + 1; // steps
     double h = 1. / n;
-    // initialising v that I will be solving for
-    // giving it a dummy first index
-    // it lacks the last boundary condition index
-    // fill in vector with 1's just to know what's up
-    arma::vec v = arma::vec(N).fill(1.);
-    v(0) = 0.;
 
     double a = -1 / (h * h);
     double d = 2 / (h * h);
@@ -126,28 +135,41 @@ int main()
     A.diag(1) = arma::vec(N - 1).fill(a);
     A.diag(-1) = arma::vec(N - 1).fill(a);
 
-    // TEST
-    arma::vec eigval; // vector of eigenvalues
-    arma::mat eigvec; // matrix of eigenvectors
-    eig_sym(eigval, eigvec, A);
-    std::cout << __LINE__ << eigval << std::endl;
-    //
-
+    // testing the method
     int k = 0;
     int l = 1;
-    arma::mat diag_A = jacobi(A, k, l, N);
-    std::cout << diag_A << std::endl;
-    // checking the eigenvalues
+
+    arma::mat diag_A = jacobi(A, k, l, N, "val");
+    arma::mat R_vec = jacobi(A, k, l, N, "vec");
+    std::cout << "evectors_jacobi: \n " << R_vec << " | " << std::endl;
+
+    arma::vec evals_jacobi_vec = arma::vec(N).fill(1.);
+
+    arma::vec evals_vec = arma::vec(N);
+    arma::mat evecs_mat = arma::mat(N, N).fill(1.);
+    evals_vec = check_analytical_eval(N, a, d);
+    evecs_mat = check_analytical_evec(N, evecs_mat, a);
+
     for (int i = 0; i < N; i++)
     {
-        double analytical_eval_i = check_analytical_eval(i, N, a, d);
-        double diff = diag_A(i, i) - analytical_eval_i;
-
-        std::cout << "analytical " << analytical_eval_i << std::endl;
-
-        std::cout << "jacobi " << diag_A(i, i) << std::endl;
-
-        std::cout << "analytical - jacobi EVAL " << i << " | " << diff << std::endl;
+        evals_jacobi_vec(i) = diag_A(i, i);
     }
+
+    std::cout << "evals_vec analytical: \n " << evals_vec << " | " << std::endl;
+    std::cout << "evals_jacobi_vec: \n " << evals_jacobi_vec << " | " << std::endl;
+
+    // ALL THE EIGENVALUES ARE THERE, THEY ARE JUST ARANGED IN A DIFERENT ORDER
+    // IF WE WERE TO REARANGE THEM, WE WOULD DO
+    // 1 -> 1
+    // 2 -> 3
+    // 3 -> 5
+    // 4 -> 6
+    // 5 -> 4
+    // 6 -> 2
+    // SO THIS IS WHAT HAPPENED TO THE COLUMNS OF R AS WELL, WITH RESPECT TO THE COLUMNS OF THE MATRIX CONTAINING THE EIGENVECTORS
+
+    std::cout << "evectors analytical : \n " << evecs_mat << " | " << std::endl;
+    std::cout << "evectors_jacobi: \n " << R_vec << " | " << std::endl;
+
     return 0;
 }
