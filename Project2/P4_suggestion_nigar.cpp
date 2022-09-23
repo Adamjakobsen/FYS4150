@@ -65,8 +65,11 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
     double tau, t, c, s;
     double a_k_k, a_i_k, r_i_k; // temporary variables
 
+    int iteration = 0;
+
     while (std::abs(max) > epsilon)
-    {
+    {   
+        iteration += 1;
         // 3.1
         tau = (A(l, l) - A(k, k)) / (2 * max);
 
@@ -111,6 +114,7 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
 
     if (ask == "val")
     {
+        std::cout << "N: " << N << ",  " << "iterations: " << iteration << "\n"<< std::endl;
         return A; // this is after the loop so this matrix is ready to eat
     }
     else
@@ -154,6 +158,7 @@ int main()
     // evals_vec_norm = normalise(evals_vec);
     evecs_mat_norm = normalise(evecs_mat);
 
+
     for (int i = 0; i < N; i++)
     {
         evals_jacobi_vec(i) = diag_A(i, i);
@@ -161,12 +166,16 @@ int main()
 
 
     arma::uvec eval_index = arma::sort_index(evals_jacobi_vec);
-    arma::mat evec_sorted = R_vec(eval_index);
+    arma::vec evals_jacobi_vec_sorted = evals_jacobi_vec(eval_index);
 
-    std::cout << "evals_vec analytical: \n " << evals_vec << " | " << std::endl;
-    std::cout << "evals_jacobi_vec: \n " << evals_jacobi_vec << " | " << std::endl;
+    arma::mat evecs_jacobi_sorted = R_vec.cols(eval_index);
+
+    // arma::vec evals_jacobi_vec_sorted = arma::sort(evals_jacobi_vec);
 
 
+    std::cout << "evals_vec_analytical: \n " << evals_vec << " | " << std::endl;
+    // std::cout << "evals_jacobi_vec: \n " << evals_jacobi_vec << " | " << std::endl;
+    std::cout << "evals_jacobi_vec_sorted: \n " << evals_jacobi_vec_sorted << " | " << std::endl;
 
 
 
@@ -182,9 +191,16 @@ int main()
     // 6 -> 2
     // SO THIS IS WHAT HAPPENED TO THE COLUMNS OF R AS WELL, WITH RESPECT TO THE COLUMNS OF THE MATRIX CONTAINING THE EIGENVECTORS
 
-    std::cout << "evectors analytical : \n " << evecs_mat << " | " << std::endl;
-    std::cout << "evectors_jacobi: \n " << R_vec << " | " << std::endl;
+    // std::cout << "evectors analytical : \n " << evecs_mat << " | " << std::endl;
     std::cout << "evectors analytical normalised : \n " << evecs_mat_norm << " | " << std::endl;
+    // std::cout << "evectors_jacobi: \n " << R_vec << " | " << std::endl;
+    std::cout << "evec_jacobi_sorted: \n " << evecs_jacobi_sorted << " | " << std::endl;
+
+    //here, we expect to output to be zero as we are subtracting the analytical matrix containing our eigenvectors from our jacobi
+    //our jacobi matrix has random negative vectors which are still consistent with our results when we find the absolute difference below
+    //this is a result of 
+    std::cout << "checking if outputs match: \n " << arma::abs(evecs_mat_norm) - arma::abs(evecs_jacobi_sorted) << "|" << std::endl;
+
 
 
 
