@@ -132,47 +132,60 @@ void output_iterations_to_file(int width, int prec, std::ofstream &ofile, int N,
 
 int main()
 {
-    std::string filename = "NOperationsP5.txt";
-
-    // Create output file stream
-    std::ofstream ofile;
-    ofile.open(filename);
+    std::vector<std::string> A_profiles_vec{"Tridiag", "Dense"};
 
     // Format parameters
     int width = 10;
     int prec = 5;
-    // HERE WE CAN START A LOOP WITH VARIOUS N VALUES
-    for (int N = 2; N <= 100; N++)
+    // HERE WE CAN START A LOOP WITH VARIOUS N VALUES and dense or not
+    for (std::string A_profile : A_profiles_vec)
     {
-        // Below is the test matrix
-        int n = N + 1; // steps
-        double h = 1. / n;
+        std::string filename = "NOperationsP5" + A_profile + ".txt ";
+        // Create output file stream
+        std::ofstream ofile;
+        ofile.open(filename);
 
-        double a = -1 / (h * h);
-        double d = 2 / (h * h);
+        for (int N = 2; N <= 100; N++)
+        {
+            // Below is the test matrix
+            int n = N + 1; // steps
+            double h = 1. / n;
 
-        arma::mat A = arma::mat(N, N).fill(0.);
-        // sets up the tridiagonal
-        A.diag() = arma::vec(N).fill(d);
-        A.diag(1) = arma::vec(N - 1).fill(a);
-        A.diag(-1) = arma::vec(N - 1).fill(a);
+            double a = -1 / (h * h);
+            double d = 2 / (h * h);
 
-        // testing the method
-        int k = 0;
-        int l = 1;
+            int k, l;
 
-        // for counting the iterations
-        int iterations;
+            // for counting the iterations
+            int iterations;
 
-        arma::mat diag_A = jacobi(iterations, A, k, l, N, "val");
-
-        // this line below only changes what to return but notice it runs the algorithm
-        // again, which is not necessary!!
-        // arma::mat R_vec = jacobi(iterations, A, k, l, N, "vec");
-
-        output_iterations_to_file(width, prec, ofile, N, iterations);
+            arma::mat A(N, N);
+            if (A_profile != "Dense")
+            {
+                k = 0;
+                l = 1;
+                arma::mat A = arma::mat(N, N).fill(0.);
+                // sets up the tridiagonal
+                A.diag() = arma::vec(N).fill(d);
+                A.diag(1) = arma::vec(N - 1).fill(a);
+                A.diag(-1) = arma::vec(N - 1).fill(a);
+                arma::mat diag_A = jacobi(iterations, A, k, l, N, "val");
+                output_iterations_to_file(width, prec, ofile, N, iterations);
+            }
+            else
+            {
+                k = 0;
+                l = 1;
+                // Generate random N*N matrix
+                arma::mat A = arma::mat(N, N).randn();
+                // Symmetrize the matrix by reflecting the upper triangle to lower triangle
+                A = arma::symmatu(A);
+                arma::mat diag_A = jacobi(iterations, A, k, l, N, "val");
+                output_iterations_to_file(width, prec, ofile, N, iterations);
+            }
+        }
+        ofile.close();
     }
-    ofile.close();
 
     return 0;
 }
