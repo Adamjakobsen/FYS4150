@@ -8,12 +8,10 @@ const double PI = 4. * atan(1.);
 arma::vec check_analytical_eval(int N, double a, double d)
 {
     arma::vec evals_vec = arma::vec(N).fill(1.);
-
     for (int i = 0; i < N; i++)
     {
         evals_vec(i) = d + 2 * a * cos((i + 1) * PI / (N + 1));
     }
-
     return evals_vec;
 }
 
@@ -27,7 +25,6 @@ arma::mat check_analytical_evec(int N, arma::mat evecs_mat, double a)
             evecs_mat(i, j) = sin((i + 1.) * (j + 1.) * PI / (N + 1.));
         }
     }
-
     return evecs_mat;
 }
 
@@ -48,11 +45,10 @@ double max_offdiag_symmetric(arma::mat &A, int N, int &k, int &l)
             }
         }
     }
-
     return A(k, l);
 }
 
-arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsilon = std::pow(10, -8))
+arma::mat jacobi(int &iterations, arma::mat A, int k, int l, int N, std::string ask, double epsilon = std::pow(10, -8))
 {
     // step 1 - initialization
     // we have defined epsilon and passed A. Now we need R
@@ -65,8 +61,14 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
     double tau, t, c, s;
     double a_k_k, a_i_k, r_i_k; // temporary variables
 
+    iterations = 0;
+
+    // HERE IS THE DIFFERENCE FROM PROBLEM 5
+    // THE NUMBER OF ROTATIONS IS PROPORTIONAL TO THE NUMBER OF ITERATIONS INSIDE THE WHILE LOOP
+    // SO WE WILL COUNT THAT
     while (std::abs(max) > epsilon)
     {
+        iterations += 1;
         // 3.1
         tau = (A(l, l) - A(k, k)) / (2 * max);
 
@@ -111,7 +113,10 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
 
     if (ask == "val")
     {
-        return A; // this is after the loop so this matrix is ready to eat
+        std::cout << "N: " << N << ",  "
+                  << "iterations: " << iterations << "\n"
+                  << std::endl;
+        return A; // this is after the loop so this matrix is ready to use
     }
     else
     {
@@ -119,57 +124,55 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
     }
 }
 
+void output_iterations_to_file(int width, int prec, std::ofstream &ofile, int N, int iterations)
+{
+    ofile << std::setw(width) << std::setprecision(prec) << std::scientific << N
+          << std::setw(width) << std::setprecision(prec) << std::scientific << iterations << std::endl;
+}
+
 int main()
 {
-    // Below is the test matrix
-    int N = 6;     // dim of sqr matrix
-    int n = N + 1; // steps
-    double h = 1. / n;
+    std::string filename = "NOperationsP5.txt";
 
-    double a = -1 / (h * h);
-    double d = 2 / (h * h);
+    // Create output file stream
+    std::ofstream ofile;
+    ofile.open(filename);
 
-    arma::mat A = arma::mat(N, N).fill(0.);
-    // sets up the tridiagonal
-    A.diag() = arma::vec(N).fill(d);
-    A.diag(1) = arma::vec(N - 1).fill(a);
-    A.diag(-1) = arma::vec(N - 1).fill(a);
-
-    // testing the method
-    int k = 0;
-    int l = 1;
-
-    arma::mat diag_A = jacobi(A, k, l, N, "val");
-    arma::mat R_vec = jacobi(A, k, l, N, "vec");
-    std::cout << "evectors_jacobi: \n " << R_vec << " | " << std::endl;
-
-    arma::vec evals_jacobi_vec = arma::vec(N).fill(1.);
-
-    arma::vec evals_vec = arma::vec(N);
-    arma::mat evecs_mat = arma::mat(N, N).fill(1.);
-    evals_vec = check_analytical_eval(N, a, d);
-    evecs_mat = check_analytical_evec(N, evecs_mat, a);
-
-    for (int i = 0; i < N; i++)
+    // Format parameters
+    int width = 10;
+    int prec = 5;
+    // HERE WE CAN START A LOOP WITH VARIOUS N VALUES
+    for (int N = 2; N <= 100; N++)
     {
-        evals_jacobi_vec(i) = diag_A(i, i);
+        // Below is the test matrix
+        int n = N + 1; // steps
+        double h = 1. / n;
+
+        double a = -1 / (h * h);
+        double d = 2 / (h * h);
+
+        arma::mat A = arma::mat(N, N).fill(0.);
+        // sets up the tridiagonal
+        A.diag() = arma::vec(N).fill(d);
+        A.diag(1) = arma::vec(N - 1).fill(a);
+        A.diag(-1) = arma::vec(N - 1).fill(a);
+
+        // testing the method
+        int k = 0;
+        int l = 1;
+
+        // for counting the iterations
+        int iterations;
+
+        arma::mat diag_A = jacobi(iterations, A, k, l, N, "val");
+
+        // this line below only changes what to return but notice it runs the algorithm
+        // again, which is not necessary!!
+        // arma::mat R_vec = jacobi(iterations, A, k, l, N, "vec");
+
+        output_iterations_to_file(width, prec, ofile, N, iterations);
     }
-
-    std::cout << "evals_vec analytical: \n " << evals_vec << " | " << std::endl;
-    std::cout << "evals_jacobi_vec: \n " << evals_jacobi_vec << " | " << std::endl;
-
-    // ALL THE EIGENVALUES ARE THERE, THEY ARE JUST ARANGED IN A DIFERENT ORDER
-    // IF WE WERE TO REARANGE THEM, WE WOULD DO
-    // 1 -> 1
-    // 2 -> 3
-    // 3 -> 5
-    // 4 -> 6
-    // 5 -> 4
-    // 6 -> 2
-    // SO THIS IS WHAT HAPPENED TO THE COLUMNS OF R AS WELL, WITH RESPECT TO THE COLUMNS OF THE MATRIX CONTAINING THE EIGENVECTORS
-
-    std::cout << "evectors analytical : \n " << evecs_mat << " | " << std::endl;
-    std::cout << "evectors_jacobi: \n " << R_vec << " | " << std::endl;
+    ofile.close();
 
     return 0;
 }
