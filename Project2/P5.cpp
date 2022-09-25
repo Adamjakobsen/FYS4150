@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-
+#include <iomanip>
 #include <armadillo>
 
 const double PI = 4. * atan(1.);
@@ -145,7 +145,7 @@ int main()
         std::ofstream ofile;
         ofile.open(filename);
 
-        for (int N = 2; N <= 100; N++)
+        for (int N = 2; N <= 200; N++)
         {
             // Below is the test matrix
             int n = N + 1; // steps
