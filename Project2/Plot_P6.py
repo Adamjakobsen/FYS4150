@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 #Get data from P6eigenboys.txt, first column is v1,second column is v2, third column is v3
 
-data = np.loadtxt("P6eigenboys.txt",float)
+data = np.loadtxt("/home/nihnux/Skole/FYS4150/FYS4150/Project2/P6eigenboys.txt",float)
 
 v1 = data[:,0]
 v2 = data[:,1]

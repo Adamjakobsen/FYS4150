@@ -18,13 +18,13 @@ for i in range(len(data1)):
     y2[i] = data2[i][1]
 
 
-plt.plot(x, y1,label='Dense')
-plt.plot(x, y2,label='Tridiagonal')
+plt.plot(np.log(x), np.log(y1),label='Dense')
+plt.plot(np.log(x), np.log(y2),label='Tridiagonal')
 
-plt.xlabel("x")
-plt.ylabel("Number of operations")
-plt.yscale('log')
-plt.xscale('log')
+plt.xlabel("log(N)")
+plt.ylabel("log(Number of operations)")
+#plt.yscale('log')
+#plt.xscale('log')
 plt.legend()
 plt.savefig('P5_fig.pdf')
-plt.show()
+#plt.show()
