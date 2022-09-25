@@ -22,9 +22,8 @@ plt.plot(np.log(x), np.log(y1),label='Dense')
 plt.plot(np.log(x), np.log(y2),label='Tridiagonal')
 
 plt.xlabel("log(N)")
-plt.ylabel("log(Number of operations)")
-#plt.yscale('log')
-#plt.xscale('log')
+plt.ylabel("log(Number of iterations)")
+plt.title("Number of iterations as function of N")
 plt.legend()
-plt.savefig('P5_fig.pdf')
-#plt.show()
+plt.savefig('P5_fig_N200.pdf')
+

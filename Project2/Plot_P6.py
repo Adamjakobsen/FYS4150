@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 #Get data from P6eigenboys.txt, first column is v1,second column is v2, third column is v3
 
-data = np.loadtxt("/home/nihnux/Skole/FYS4150/FYS4150/Project2/P6eigenboys.txt",float)
+data = np.loadtxt("P6eigenboys.txt",float)
 
 v1 = data[:,0]
 v2 = data[:,1]
@@ -22,8 +22,8 @@ x = np.linspace(0,1,len(v1))
 plt.plot(x,v1,label="v1")
 plt.plot(x,v2,label="v2")
 plt.plot(x,v3,label="v3")
-plt.xlabel("x")
+plt.xlabel(r"$\^x$")
 plt.ylabel("v")
+plt.title("Solutions to the eigenvalue problem")
 plt.legend()
 plt.savefig('P6_fig'+f'_{len(x)}'+ '.pdf')
-plt.show()
