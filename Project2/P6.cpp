@@ -48,7 +48,7 @@ double max_offdiag_symmetric(arma::mat &A, int N, int &k, int &l)
     return A(k, l);
 }
 
-arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsilon = std::pow(10, -6))
+arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsilon = std::pow(10, -3))
 {
     // step 1 - initialization
     // we have defined epsilon and passed A. Now we need R
