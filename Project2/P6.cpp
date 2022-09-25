@@ -121,10 +121,10 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     // Below is the test matrix
-    int N = 10;    // dim of sqr matrix
+    int N = atoi(argv[1]);    // dim of sqr matrix
     int n = N + 1; // steps
     double h = 1. / n;
 
