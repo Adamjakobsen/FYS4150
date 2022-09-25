@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-
+#include <iomanip>
 #include <armadillo>
 
 const double PI = 4. * atan(1.);
@@ -178,11 +178,18 @@ int main()
     int width = 30;
     int prec = 10;
     arma::vec X = arma::linspace(0, 1, N);
+
     // output the eigenboys
-    ofile << std::setw(width) << std::setprecision(prec) << std::scientific << X << std::endl;
-    ofile << std::setw(width) << std::setprecision(prec) << std::scientific << evecs_jacobi_sorted.col(0) << std::endl;
-    ofile << std::setw(width) << std::setprecision(prec) << std::scientific << evecs_jacobi_sorted.col(1) << std::endl;
-    ofile << std::setw(width) << std::setprecision(prec) << std::scientific << evecs_jacobi_sorted.col(2) << std::endl;
+
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            ofile << std::setw(width) << std::setprecision(prec) << evecs_jacobi_sorted(i, j);
+        }
+        ofile << std::endl;
+    }
+
     ofile.close();
 
     return 0;
