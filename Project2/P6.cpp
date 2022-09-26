@@ -53,7 +53,7 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
     // step 1 - initialization
     // we have defined epsilon and passed A. Now we need R
     arma::mat R = arma::eye(N, N);
-
+:
     // step 2 - call the max_offdiag_symmetric
     double max = max_offdiag_symmetric(A, N, k, l);
 
@@ -171,8 +171,12 @@ int main(int argc, char *argv[])
     // std::cout << "evals_vec analytical normalised: \n " << evals_vec_norm << " | " << std::endl;
     std::cout << "evec_jacobi_sorted: \n " << evecs_jacobi_sorted << " | " << std::endl;
 
+    // Eigenboys refer to eigenvectors found using Jacobi's rotation method
+
     std::string filename = "P6eigenboys.txt";
+    
     // Create output file stream
+
     std::ofstream ofile;
     ofile.open(filename);
     int width = 30;
