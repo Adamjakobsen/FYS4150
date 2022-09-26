@@ -53,7 +53,7 @@ arma::mat jacobi(arma::mat A, int k, int l, int N, std::string ask, double epsil
     // step 1 - initialization
     // we have defined epsilon and passed A. Now we need R
     arma::mat R = arma::eye(N, N);
-:
+
     // step 2 - call the max_offdiag_symmetric
     double max = max_offdiag_symmetric(A, N, k, l);
 
