@@ -1,29 +1,30 @@
 # Project 2
 
-Before anything else, it is important to have all used libraries installed. Make sure of that by running 
+All problems are solved in the the "main.cpp" file. To ask for the specific output and txt files you want generated, simply compile and link by running
 
 ```
-pip install numpy matplotlib 
+g++ main.cpp utils.cpp -o main -std=c++11 -larmadillo  
 ```
-
-## Reproducing results
-
-### Problem 2
-For compiling, run the following command in terminal
-
+and execute the code by running 
 ```
-g++ P2.cpp -o P2
+./main PN
 ```
+Where N is the number of the desired problem. An example for executing problem 2 should then be  "./main P2".
 
-Then run the following command for producing the data file
+**Exception**
+The only for this process is problem 6, which requires 2 arguments. The second argument should be the dimension of the desired sqare matrix. An exemple for the execution of problem 6 would then be:
 
 ```
-./P2
+./main P6 10
 ```
 
-### Problem 3
-### Problem 4
-### Problem 5
-### Problem 6
+## Ploting results
+Given that all problems were properly executed and the .txt files are in the local directory the plots for problem 5 and 6 and be saved by running
+
+```
+python plot.py PN
+```
+
+Where, again, N is the desired problem. For the plots, only the arguments 5 and 6 are possible.
 
 
