@@ -12,7 +12,7 @@ and execute the code by running
 Where N is the number of the desired problem. An example for executing problem 2 should then be  "./main P2".
 
 **Exception**
-The only for this process is problem 6, which requires 2 arguments. The second argument should be the dimension of the desired sqare matrix. An exemple for the execution of problem 6 would then be:
+The only for this process is problem 6, which requires 2 arguments. The second argument should be the dimension of the desired sqare matrix. An example for the execution of problem 6 would then be:
 
 ```
 ./main P6 10
