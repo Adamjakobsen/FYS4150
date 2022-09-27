@@ -19,12 +19,12 @@ The only for this process is problem 6, which requires 2 arguments. The second a
 ```
 
 ## Ploting results
-Given that all problems were properly executed and the .txt files are in the local directory the plots for problem 5 and 6 and be saved by running
+Given that all problems were properly executed and the .txt files are in the local directory, the plots for problem 5 and 6 can be saved by running
 
 ```
 python plot.py PN
 ```
 
-Where, again, N is the desired problem. For the plots, only the arguments 5 and 6 are possible.
+where, again, N is the desired problem. For the plots, only the arguments 5 and 6 are possible.
 
 
