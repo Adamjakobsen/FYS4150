@@ -54,7 +54,13 @@ void PenningTrap::evolve_forward_Euler(double dt)
 // Force on particle_i from particle_j
 arma::vec PenningTrap::force_particle(int i, int j)
 {
-
+    //i want to use arma::norm here but it computes some sort of a p-norm and idk what it is? 
+    //it is supposedly a normal "norm" but idfk
+    double charges = particle1.q * particle2.q
+    //force by by particle 2 on particle 1
+    armma::vec distance_21 = particle2 - particle1
+    arma::vec force_ij = charges * distance_21
+    // { prefactor_value * x, prefactor_value * y, -prefactor_value * 2. * z }
 }
 
 // The total force on particle_i from the external fields
