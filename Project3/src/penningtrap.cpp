@@ -9,7 +9,13 @@ PenningTrap::PenningTrap(double B0_in, double V0_in, double d_in)
 
     std::vector<Particle> particles_init; 
     particles = particles_init;
-    // particles.at(0)
+
+}
+
+//Add particle to the trap 
+void PenningTrap::add_particle(Particle p_in)
+{
+    particles.push_back(p_in);
 }
 
 // External electric field at point r=(x,y,z)
@@ -20,25 +26,17 @@ arma::vec PenningTrap::external_E_field(arma::vec r)
     double z = r(2);
 
     //define the potential given in the exercise
-    double prefactor = V0/(d*d);
+    double prefactor_value = V0/(d*d); //not sure if we even need this definition if we already know what the prefactor value is
     
-    //derive with respect to all three components to find e-field
-    arma::vec E_field = { prefactor*x, prefactor*y, -prefactor*2.*z };
-    return E_field;
+    //derive with respect to all three components to find e-field 
+    return arma::vec(std::vector<double> { prefactor_value * x, prefactor_value * y, -prefactor_value * 2. * z });
 }
 
 // External magnetic field at point r=(x,y,z)
 arma::vec PenningTrap::external_B_field(arma::vec r)
 {
 //include B-field here with z-direction, given by B-field strength 
-//basically define an arma::vector here for it 
-    // return arma::vec:: external_B_field = {}
-}
-
-//Add particle to the trap 
-void PenningTrap::add_particle(Particle p_in)
-{
-    
+    return arma::vec(std::vector<double> { 0, 0, B0});
 }
 
 //Evolve the system one time step (dt) using Runge-Kutta 4th order
@@ -51,5 +49,29 @@ void PenningTrap::evolve_RK4(double dt)
 void PenningTrap::evolve_forward_Euler(double dt)
 {
     
+}
+
+// Force on particle_i from particle_j
+arma::vec PenningTrap::force_particle(int i, int j)
+{
+
+}
+
+// The total force on particle_i from the external fields
+arma::vec PenningTrap::total_force_external(int i)
+{
+
+}
+
+ // The total force on particle_i from the other particles
+arma::vec PenningTrap::total_force_particles(int i)
+{
+
+}
+
+// The total force on particle_i from both external fields and other particles
+arma::vec PenningTrap::total_force(int i)
+{
+
 }
 
