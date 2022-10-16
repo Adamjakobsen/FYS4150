@@ -55,6 +55,20 @@ void PenningTrap::evolve_forward_Euler(double dt)
 arma::vec PenningTrap::force_particle(int i, int j)
 {
 
+    //define empty 3 dimentional vector for our force
+    arma::vec force_ij = arma::vec(3, arma::fill::zeros);
+
+    //define some constants and other variables that will be used 
+    double k_e = 1.38935333;
+    double charges = particles.at(i).q * particles.at(j).q;
+
+    //calculate the distance from particle_i to particle_j and find norm of the force
+    arma::vec distance_ij = particles.at(i).r - particles.at(j).r;
+    double distance_ij_norm = arma::norm(distance_ij, 1);
+
+    //calculate the force on particle_i from particle_j
+    force_ij = (k_e*charges * distance_ij ) / (pow(distance_ij_norm,3));
+    return force_ij;
 }
 
 // The total force on particle_i from the external fields
