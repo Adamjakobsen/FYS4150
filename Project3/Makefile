@@ -1,5 +1,5 @@
 all: 
-	g++ main.cpp particle.cpp Particle.hpp penningtrap.cpp PenningTrap.hpp -larmadillo -o main
+	g++ main.cpp ./src/particle.cpp ./include/Particle.hpp ./src/penningtrap.cpp ./include/PenningTrap.hpp -larmadillo -o main
 
 run:
 	./main

@@ -2,8 +2,8 @@
 #include <cmath>
 
 #include <armadillo>
-#include "Particle.hpp"
-#include "PenningTrap.hpp"
+#include "./include/Particle.hpp"
+#include "./include/PenningTrap.hpp"
 
 void prettyprint(arma::vec armavec, std::string title, std::vector<std::string> labels);
 
