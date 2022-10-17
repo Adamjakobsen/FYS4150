@@ -1,4 +1,4 @@
-#include "../include/Particle.hpp"
+#include "../Include/Particle.hpp"
 
 Particle::Particle(double q_in, double m_in, arma::vec r_in, arma::vec v_in)
 {
