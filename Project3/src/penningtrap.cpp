@@ -40,8 +40,69 @@ arma::vec PenningTrap::external_B_field(arma::vec r)
 }
 
 //Evolve the system one time step (dt) using Runge-Kutta 4th order
+// Evolve the system one time step (dt) using Runge-Kutta 4th order
 void PenningTrap::evolve_RK4(double dt)
 {
+    //PenningTrap PT = PenningTrap(B0, V0, d);
+
+    
+
+    arma::vec ext=external_E_field(0) + external_B_field(0);
+    double q=particles.at(0).q;
+    double m=particles.at(0).m;
+    //Lets first test with one particle in the xternal field
+
+    arma::vec r = particles.at(0).r;
+    arma::vec v = particles.at(0).v;
+    arma::vec ext_force = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
+    arma::vec k1=ext_force/m;
+
+    particles.at(0).v = v + k1*1/2*dt;
+    particles.at(0).r = r + v*1/2*dt;
+
+    arma::vec k2 = 1/m*( q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ) );
+
+    particles.at(0).v = v + k2*1/2*dt;
+    particles.at(0).r = r + v*1/2*dt;
+
+    arma::vec k3 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ));
+
+    particles.at(0).v = v + k3*dt;
+    particles.at(0).r = r + v*dt;
+
+    arma::vec k4 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ));
+
+    particles.at(0).v = v + 1/6*dt*(k1 + 2*k2 + 2*k3 + k4);
+    particles.at(0).r = r + 1/6*dt*(k1 + 2*k2 + 2*k3 + k4);
+
+    
+    /* 
+    //define the k's for the RK4 method
+    double kr_1 = dt * r;
+    double kv_1 = dt * v;
+
+    double mid_r = r + 0.5 * kr_1;
+    double mid_v = v + 0.5 * kv_1;
+
+    double kr_2 = dt * mid_r;
+    double kv_2 = dt * mid_v;
+
+    double mid_r2 = r + 0.5 * kr_2;
+    double mid_v2 = v + 0.5 * kv_2;
+
+    double kr_3 = dt * mid_r2;
+    double kv_3 = dt * mid_v2;
+
+    double r3 = r + kr_3;
+    double v3 = v + kv_3;
+
+    double kr_4 = dt * r3;
+    double kv_4 = dt * v3;
+
+    double position_updated = r + (1/6)*(kr_1 + 2*kr_2 + 2*kr_3 + kr_4);
+    double velocity_updated = v + (1/6)*(kv_1 + 2*kv_2 + 2*kv_3 + kv_4);
+     */ 
+    //return position_updated, velocity_updated;
 
 }
 

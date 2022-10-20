@@ -26,14 +26,15 @@ int main()
     double V0 = 2.41 * pow(10, 6);  
     double d = 500; //micrometers
     double q = 1.602 * pow(10,-19); //double check with the A-team
+    double m = 40.078; //calcium ion's atomic mass in atomic mass units
 
 
     //remember to define correct elementary charge value here!!
     //here, I create object of type "Particle" using our class, which I call "particle1", and assign attributes to it such as 
     //charge, mass, position and velocity!
-    Particle particle1 = Particle(1.6, 2.5, r1, v1);
+    Particle particle1 = Particle(q, m, r1, v1);
     //I do the same thing here, just for the second particle 
-    Particle particle2 = Particle(1.6, 2.5, r2, v2);
+    Particle particle2 = Particle(q, m, r2, v2);
     PenningTrap PT = PenningTrap(B0, V0, d);
 
 
@@ -45,9 +46,22 @@ int main()
     // arma::vec ext_electric_field = PT.external_E_field(particle.r);
     // arma::vec ext_magnetic_field = PT.external_B_field(particle.r);
 
+    // Define time step and number of time steps
+    double dt = 0.01; // microseconds
+    int N = 1000; // number of time steps
+
+    // Use rk4 to evolve and write to file
+    std::ofstream outfile;
+    outfile.open("positions.txt");
+    for (int i = 0; i < N; i++) {
+        PT.evolve_RK4(dt);
+        outfile << PT.particles[0].r(0) << " " << PT.particles[0].r(1) << " " << PT.particles[0].r(2) << std::endl;
+    }
+    
     for (int i = 0; i < PT.particles.size(); ++i)
     {
         PT.particles.at(i).print_attributes();
+        std::cout << "Particle cpp has run" << std::endl;
         prettyprint(PT.particles.at(i).r, "Particle " + std::to_string(i + 1) + "'s positions", std::vector<std::string>{"x", "y", "z"});
         prettyprint(PT.particles.at(i).v, "Particle " + std::to_string(i + 1) + "'s velocities", std::vector<std::string>{"x", "y", "z"});
     }
@@ -55,7 +69,16 @@ int main()
     // std::cout << "External E-field" << "\n" << electric_field;
     // prettyprint(ext_electric_field, "External E-field", std::vector<std::string> { "x", "y", "z" });
     // prettyprint(ext_magnetic_field, "External B-field", std::vector<std::string> { "x", "y", "z" });
- 
+    
+    arma::vec force_ij = PT.force_particle(0,1);
+    prettyprint(force_ij, "Force_ij", std::vector<std::string> { "x", "y", "z" });
+
+    // evolve with rk4 from PenningTrap class with dt = 0.01 microseconds
+    
+    
+    
+
+    
 
     return 0;
 }
