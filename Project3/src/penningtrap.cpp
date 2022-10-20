@@ -46,109 +46,66 @@ void PenningTrap::evolve_RK4(double dt)
     //PenningTrap PT = PenningTrap(B0, V0, d);
 
     
+    for (int i = 0; i < particles.size(); i++){
+        
+        double q=particles.at(i).q;
+        double m=particles.at(i).m;
+        //Lets first test with one particle in the xternal field
+        
+        arma::vec r = particles.at(i).r;
+        arma::vec v = particles.at(i).v;
+        arma::vec F = total_force(i);
+        arma::vec k1= (F/m) * dt;
 
-    
-    double q=particles.at(0).q;
-    double m=particles.at(0).m;
-    //Lets first test with one particle in the xternal field
-    
-    arma::vec r = particles.at(0).r;
-    arma::vec v = particles.at(0).v;
-    arma::vec ext_force = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
-    arma::vec k1= (ext_force/m) * dt;
+        particles.at(i).v = v + k1*1/2.*dt;
+        particles.at(i).r = r + k1*1/2.*dt;
+        r = particles.at(i).r;
+        v = particles.at(i).v;
 
-    particles.at(0).v = v + k1*1/2.*dt;
-    particles.at(0).r = r + k1*1/2.*dt;
-    r = particles.at(0).r;
-    v = particles.at(0).v;
+        F = total_force(i);
+        arma::vec k2 = (F/m)*dt;
 
-    arma::vec k2 = 1/m*( q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ) )*dt;
+        particles.at(i).v = v + k2*1/2.*dt;
+        particles.at(i).r = r + k2*1/2.*dt;
+        r = particles.at(i).r;
+        v = particles.at(i).v;
 
-    particles.at(0).v = v + k2*1/2.*dt;
-    particles.at(0).r = r + k2*1/2.*dt;
-    r = particles.at(0).r;
-    v = particles.at(0).v;
+        F = total_force(i);
+        arma::vec k3 = (F/m)*dt;
 
-    arma::vec k3 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ))*dt;
+        particles.at(i).v = v + k3*dt;
+        particles.at(i).r = r + k3*dt;
+        r = particles.at(i).r;
+        v = particles.at(i).v;
 
-    particles.at(0).v = v + k3*dt;
-    particles.at(0).r = r + k3*dt;
-    r = particles.at(0).r;
-    v = particles.at(0).v;
+        F = total_force(i);
+        arma::vec k4 = (F/m)*dt;
 
-    arma::vec k4 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ))*dt;
-
-    particles.at(0).v = v + 1/6.*dt*(k1 + 2*k2 + 2*k3 + k4);
-    particles.at(0).r = r + 1/6.*dt*(k1 + 2*k2 + 2*k3 + k4);
-    
-    /* 
-    arma::vec r = particles.at(0).r;
-    arma::vec v = particles.at(0).v;
-
-    arma::vec ext_force = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
-    arma::vec k_v1 = ext_force/m * dt;
-    arma::vec k_r1 = v * dt;
-
-    arma::vec k_v2 = (q*external_E_field(r + k_r1*1/2..) + q*arma::cross(v + k_v1*1/2..,external_B_field(r + k_r1*1/2..) ))*dt/m;
-    arma::vec k_r2 = (v + k_v1*1/2..) * dt;
-
-    arma::vec k_v3 = (q*external_E_field(r + k_r2*1/2..) + q*arma::cross(v + k_v2*1/2..,external_B_field(r + k_r2*1/2..) ))*dt/m;
-    arma::vec k_r3 = (v + k_v2*1/2..) * dt;
-
-    arma::vec k_v4 = (q*external_E_field(r + k_r3) + q*arma::cross(v + k_v3,external_B_field(r + k_r3) ))*dt/m;
-    arma::vec k_r4 = (v + k_v3) * dt;
-
-    particles.at(0).v = v + 1/6.*dt*(k_v1 + 2.*k_v2 + 2.*k_v3 + k_v4);
-    particles.at(0).r = r + 1/6.*dt*(k_r1 + 2.*k_r2 + 2.*k_r3 + k_r4);
-    */
-
-    /* 
-    //define the k's for the RK4 method
-    double kr_1 = dt * r;
-    double kv_1 = dt * v;
-
-    double mid_r = r + 0.5 * kr_1;
-    double mid_v = v + 0.5 * kv_1;
-
-    double kr_2 = dt * mid_r;
-    double kv_2 = dt * mid_v;
-
-    double mid_r2 = r + 0.5 * kr_2;
-    double mid_v2 = v + 0.5 * kv_2;
-
-    double kr_3 = dt * mid_r2;
-    double kv_3 = dt * mid_v2;
-
-    double r3 = r + kr_3;
-    double v3 = v + kv_3;
-
-    double kr_4 = dt * r3;
-    double kv_4 = dt * v3;
-
-    double position_updated = r + (1/6)*(kr_1 + 2*kr_2 + 2*kr_3 + kr_4);
-    double velocity_updated = v + (1/6)*(kv_1 + 2*kv_2 + 2*kv_3 + kv_4);
-     */ 
-    //return position_updated, velocity_updated;
+        particles.at(i).v = v + 1/6.*dt*(k1 + 2*k2 + 2*k3 + k4);
+        particles.at(i).r = r + 1/6.*dt*(k1 + 2*k2 + 2*k3 + k4);
+    }
 
 }
 
 // Evolve the system one time step (dt) using Forward Euler
 void PenningTrap::evolve_forward_Euler(double dt)
-{
-    double q=particles.at(0).q;
-    double m=particles.at(0).m;
-    //Lets first test with one particle in the xternal field
+{   
+    for (int i = 0; i < particles.size(); i++)
+    {
+        double q=particles.at(i).q;
+        double m=particles.at(i).m;
+        
 
-    arma::vec r = particles.at(0).r;
-    arma::vec v = particles.at(0).v;
-    arma::vec ext_force = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
-    arma::vec a = ext_force/m;
+        arma::vec r = particles.at(i).r;
+        arma::vec v = particles.at(i).v;
+        arma::vec F = total_force(i);
+        arma::vec a = F/m;
 
 
-    //Evolve using foward euler
-    particles.at(0).r=r+v*dt;
-    particles.at(0).v= v + a*dt;
-
+        //Evolve using foward euler
+        particles.at(i).r=r+v*dt;
+        particles.at(i).v= v + a*dt;
+    }
 }
 
 // Force on particle_i from particle_j
@@ -175,17 +132,52 @@ arma::vec PenningTrap::force_particle(int i, int j)
 arma::vec PenningTrap::total_force_external(int i)
 {
 
+    //define empty 3 dimentional vector for our force
+    arma::vec force_external = arma::vec(3, arma::fill::zeros);
+
+    //define some constants and other variables that will be used 
+    double q = particles.at(i).q;
+    double m = particles.at(i).m;
+    arma::vec r = particles.at(i).r;
+    arma::vec v = particles.at(i).v;
+
+    //calculate the force on particle_i from the external fields
+    force_external = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
+    return force_external;
+
 }
 
  // The total force on particle_i from the other particles
 arma::vec PenningTrap::total_force_particles(int i)
 {
+    
+        //define empty 3 dimentional vector for our force
+        arma::vec force_particles = arma::vec(3, arma::fill::zeros);
+    
+        //define some constants and other variables that will be used 
+        double q = particles.at(i).q;
+        double m = particles.at(i).m;
+        arma::vec r = particles.at(i).r;
+        arma::vec v = particles.at(i).v;
+    
+        int n_particles = particles.size();
+        //calculate the force on particle_i from all the other particles
+        for (int j = 0; j < n_particles; j++){
+            if (j != i){
+                force_particles += force_particle(i,j);
+            }
+        }
+        return force_particles;
 
 }
 
 // The total force on particle_i from both external fields and other particles
 arma::vec PenningTrap::total_force(int i)
 {
+    arma::vec force_total = arma::vec(3, arma::fill::zeros);
+    force_total = total_force_external(i) + total_force_particles(i);
+    return force_total;
 
 }
+
 
