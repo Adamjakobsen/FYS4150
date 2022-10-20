@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
-
+#include <string>
+#include <fstream>
+#include <iomanip>
 #include <armadillo>
 #include "./include/Particle.hpp"
 #include "./include/PenningTrap.hpp"
@@ -25,7 +27,7 @@ int main()
     double B0 = 9.65 * pow(10,1);
     double V0 = 2.41 * pow(10, 6);  
     double d = 500; //micrometers
-    double q = 1.602 * pow(10,-19); //double check with the A-team
+    double q = 1;//.602 * pow(10,-19); //double check with the A-team
     double m = 40.078; //calcium ion's atomic mass in atomic mass units
 
 
@@ -48,15 +50,48 @@ int main()
 
     // Define time step and number of time steps
     double dt = 0.01; // microseconds
-    int N = 1000; // number of time steps
+    int N = 100000; // number of time steps
 
     // Use rk4 to evolve and write to file
+    // Format parameters
+
     std::ofstream outfile;
-    outfile.open("positions.txt");
-    for (int i = 0; i < N; i++) {
+	int width = 18;
+	int prec = 10;
+
+    
+    outfile.open("positions_rk4.txt");
+    
+    for (int i = 0; i < N; i++) 
+        {
+        
         PT.evolve_RK4(dt);
-        outfile << PT.particles[0].r(0) << " " << PT.particles[0].r(1) << " " << PT.particles[0].r(2) << std::endl;
-    }
+        
+            outfile << 
+            std::setw(width) << std::setprecision(prec) <<PT.particles.at(0).r.at(0) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).r.at(1) << 
+            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  std::endl;
+        
+        }
+    
+    outfile.close();
+    outfile.open("positions_Euler.txt");
+    dt=0.001;
+    N=10000;
+
+        for (int i = 0; i < N; i++) 
+        {
+        
+        PT.evolve_forward_Euler(dt);
+        
+            outfile << 
+            std::setw(width) << std::setprecision(prec) <<PT.particles.at(0).r.at(0) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).r.at(1) << 
+            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  std::endl;
+        
+        }
+    outfile.close();
+    
     
     for (int i = 0; i < PT.particles.size(); ++i)
     {

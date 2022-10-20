@@ -47,35 +47,61 @@ void PenningTrap::evolve_RK4(double dt)
 
     
 
-    arma::vec ext=external_E_field(0) + external_B_field(0);
+    
     double q=particles.at(0).q;
     double m=particles.at(0).m;
     //Lets first test with one particle in the xternal field
-
+    
     arma::vec r = particles.at(0).r;
     arma::vec v = particles.at(0).v;
     arma::vec ext_force = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
-    arma::vec k1=ext_force/m;
+    arma::vec k1= (ext_force/m) * dt;
 
-    particles.at(0).v = v + k1*1/2*dt;
-    particles.at(0).r = r + v*1/2*dt;
+    particles.at(0).v = v + k1*1/2.*dt;
+    particles.at(0).r = r + k1*1/2.*dt;
+    r = particles.at(0).r;
+    v = particles.at(0).v;
 
-    arma::vec k2 = 1/m*( q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ) );
+    arma::vec k2 = 1/m*( q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ) )*dt;
 
-    particles.at(0).v = v + k2*1/2*dt;
-    particles.at(0).r = r + v*1/2*dt;
+    particles.at(0).v = v + k2*1/2.*dt;
+    particles.at(0).r = r + k2*1/2.*dt;
+    r = particles.at(0).r;
+    v = particles.at(0).v;
 
-    arma::vec k3 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ));
+    arma::vec k3 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ))*dt;
 
     particles.at(0).v = v + k3*dt;
-    particles.at(0).r = r + v*dt;
+    particles.at(0).r = r + k3*dt;
+    r = particles.at(0).r;
+    v = particles.at(0).v;
 
-    arma::vec k4 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ));
+    arma::vec k4 = 1/m*(q*external_E_field(r) + q*arma::cross(v,external_B_field(r) ))*dt;
 
-    particles.at(0).v = v + 1/6*dt*(k1 + 2*k2 + 2*k3 + k4);
-    particles.at(0).r = r + 1/6*dt*(k1 + 2*k2 + 2*k3 + k4);
-
+    particles.at(0).v = v + 1/6.*dt*(k1 + 2*k2 + 2*k3 + k4);
+    particles.at(0).r = r + 1/6.*dt*(k1 + 2*k2 + 2*k3 + k4);
     
+    /* 
+    arma::vec r = particles.at(0).r;
+    arma::vec v = particles.at(0).v;
+
+    arma::vec ext_force = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
+    arma::vec k_v1 = ext_force/m * dt;
+    arma::vec k_r1 = v * dt;
+
+    arma::vec k_v2 = (q*external_E_field(r + k_r1*1/2..) + q*arma::cross(v + k_v1*1/2..,external_B_field(r + k_r1*1/2..) ))*dt/m;
+    arma::vec k_r2 = (v + k_v1*1/2..) * dt;
+
+    arma::vec k_v3 = (q*external_E_field(r + k_r2*1/2..) + q*arma::cross(v + k_v2*1/2..,external_B_field(r + k_r2*1/2..) ))*dt/m;
+    arma::vec k_r3 = (v + k_v2*1/2..) * dt;
+
+    arma::vec k_v4 = (q*external_E_field(r + k_r3) + q*arma::cross(v + k_v3,external_B_field(r + k_r3) ))*dt/m;
+    arma::vec k_r4 = (v + k_v3) * dt;
+
+    particles.at(0).v = v + 1/6.*dt*(k_v1 + 2.*k_v2 + 2.*k_v3 + k_v4);
+    particles.at(0).r = r + 1/6.*dt*(k_r1 + 2.*k_r2 + 2.*k_r3 + k_r4);
+    */
+
     /* 
     //define the k's for the RK4 method
     double kr_1 = dt * r;
@@ -109,7 +135,20 @@ void PenningTrap::evolve_RK4(double dt)
 // Evolve the system one time step (dt) using Forward Euler
 void PenningTrap::evolve_forward_Euler(double dt)
 {
-    
+    double q=particles.at(0).q;
+    double m=particles.at(0).m;
+    //Lets first test with one particle in the xternal field
+
+    arma::vec r = particles.at(0).r;
+    arma::vec v = particles.at(0).v;
+    arma::vec ext_force = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
+    arma::vec a = ext_force/m;
+
+
+    //Evolve using foward euler
+    particles.at(0).r=r+v*dt;
+    particles.at(0).v= v + a*dt;
+
 }
 
 // Force on particle_i from particle_j
