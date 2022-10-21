@@ -43,15 +43,17 @@ int main()
     // particle1.print_attributes();
     // particle2.print_attributes();
     PT.add_particle(particle1);
-    PT.add_particle(particle2);
+    //PT.add_particle(particle2);
 
 
     // arma::vec ext_electric_field = PT.external_E_field(particle.r);
     // arma::vec ext_magnetic_field = PT.external_B_field(particle.r);
 
     // Define time step and number of time steps
-    double dt = 0.01; // microseconds
-    int N = 100000; // number of time steps
+    //double total_time= 10;
+    int N = 10000;
+    double dt = 0.001;
+
     int n_particles = PT.particles.size();
     // Use rk4 to evolve and write to file
     // Format parameters
@@ -63,46 +65,39 @@ int main()
     
     outfile.open("positions_rk4.txt");
 
-    for (int j = 0; j < n_particles; j++)
-    {
+    
     for (int i = 0; i < N; i++) 
         {
         
         PT.evolve_RK4(dt);
         
             outfile << 
-            std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
-            std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
-            std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  std::endl;
+            std::setw(width) << std::setprecision(prec) <<PT.particles.at(0).r.at(0) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).r.at(1) << 
+            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  std::endl;
         
         }
-    }
+    
     
     outfile.close();
     
+    //####### EULER #######
+    /* 
     outfile.open("positions_Euler.txt");
-    dt=0.001;
-    N=10000;
     
-
-    for (int j = 0; j < n_particles; j++)
-    {
-    //outfile << "particle " << j << std::endl;
     for (int i = 0; i < N; i++) 
     {
         
         PT.evolve_forward_Euler(dt);
         
             outfile << 
-            std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
-            std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
-            std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  std::endl;
-        
-    }
+            std::setw(width) << std::setprecision(prec) <<PT.particles.at(0).r.at(0) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).r.at(1) << 
+            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  std::endl;    
     }
     outfile.close();
-    
-    
+     */
+    /* 
     for (int i = 0; i < PT.particles.size(); ++i)
     {
         PT.particles.at(i).print_attributes();
@@ -110,7 +105,7 @@ int main()
         prettyprint(PT.particles.at(i).r, "Particle " + std::to_string(i + 1) + "'s positions", std::vector<std::string>{"x", "y", "z"});
         prettyprint(PT.particles.at(i).v, "Particle " + std::to_string(i + 1) + "'s velocities", std::vector<std::string>{"x", "y", "z"});
     }
-
+     */
     // std::cout << "External E-field" << "\n" << electric_field;
     // prettyprint(ext_electric_field, "External E-field", std::vector<std::string> { "x", "y", "z" });
     // prettyprint(ext_magnetic_field, "External B-field", std::vector<std::string> { "x", "y", "z" });
