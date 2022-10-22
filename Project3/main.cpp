@@ -8,7 +8,8 @@
 #include "./include/PenningTrap.hpp"
 
 void prettyprint(arma::vec armavec, std::string title, std::vector<std::string> labels);
-
+void RK4_data(int n_particles,int n_timesteps,double total_time);
+void Euler_data(int n_particles,int n_timesteps,double total_time);
 int main()
 {
     //define your positions and velocities here 
@@ -43,16 +44,16 @@ int main()
     // particle1.print_attributes();
     // particle2.print_attributes();
     PT.add_particle(particle1);
-    //PT.add_particle(particle2);
+    PT.add_particle(particle2);
 
 
     // arma::vec ext_electric_field = PT.external_E_field(particle.r);
     // arma::vec ext_magnetic_field = PT.external_B_field(particle.r);
 
     // Define time step and number of time steps
-    //double total_time= 10;
+    double total_time= 50;
     int N = 10000;
-    double dt = 0.001;
+    double dt = total_time/N;
 
     int n_particles = PT.particles.size();
     // Use rk4 to evolve and write to file
@@ -65,22 +66,23 @@ int main()
     
     outfile.open("positions_rk4.txt");
 
-    
+    for (int j=0; j<n_particles; j++)
+    {
     for (int i = 0; i < N; i++) 
         {
         
         PT.evolve_RK4(dt);
         
             outfile << 
-            std::setw(width) << std::setprecision(prec) <<PT.particles.at(0).r.at(0) << 
-            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).r.at(1) << 
-            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  std::endl;
+            std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
+            std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  std::endl;
         
         }
-    
+    }
     
     outfile.close();
-    
+     
     //####### EULER #######
     /* 
     outfile.open("positions_Euler.txt");

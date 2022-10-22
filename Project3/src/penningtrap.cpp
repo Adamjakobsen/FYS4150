@@ -19,6 +19,7 @@ void PenningTrap::add_particle(Particle p_in)
 }
 
 // External electric field at point r=(x,y,z)
+
 arma::vec PenningTrap::external_E_field(arma::vec r)
 {
     double x = r(0);
@@ -47,45 +48,97 @@ void PenningTrap::evolve_RK4(double dt)
 {
      
 // created a copy of particles to avoid changing the original vector
-std::vector<Particle> particles_copy = particles;
+    std::vector<Particle> particles_copy = particles;
 
+    
     double q=particles.at(0).q;
     double m=particles.at(0).m;
- 
-    arma::vec k1_r = arma::vec(3);
-    arma::vec k1_v = arma::vec(3);
-    arma::vec k2_r = arma::vec(3);
-    arma::vec k2_v = arma::vec(3);
-    arma::vec k3_r = arma::vec(3);
-    arma::vec k3_v = arma::vec(3);
-    arma::vec k4_r = arma::vec(3);
-    arma::vec k4_v = arma::vec(3);
-    //Total force on particle i is total_force
+    
+    double n_particles = particles.size();
+    std::vector<arma::vec> k1_r(n_particles);
+    std::vector<arma::vec> k1_v(n_particles);
+    std::vector<arma::vec> k2_r(n_particles);
+    std::vector<arma::vec> k2_v(n_particles);
+    std::vector<arma::vec> k3_r(n_particles);
+    std::vector<arma::vec> k3_v(n_particles);
+    std::vector<arma::vec> k4_r(n_particles);
+    std::vector<arma::vec> k4_v(n_particles);
+
+    
+    
     for (int i=0; i<particles.size(); i++)
-    {
-        k1_r = particles.at(i).v*dt;
-        k1_v = 1/m * total_force(i)*dt;
+    {   
+        arma::vec v = particles.at(i).v;
+        arma::vec F = total_force(i);
+        
+        k1_r.at(i) = v*dt;
+        
+        k1_v.at(i) = F/m*dt;
+        
+    }
 
-        particles.at(i).r = particles.at(i).r + 0.5*k1_r(i)*dt;
-        particles.at(i).v = particles.at(i).v + 0.5*k1_v(i)*dt;
+    for (int i=0; i<particles.size(); i++)
+    {   
+        arma::vec v = particles_copy.at(i).v;
+        arma::vec r = particles_copy.at(i).r;
 
-        k2_r = dt * particles.at(i).r + 0.5*k1_r(i);
-        k2_v = dt * total_force(i)/m;
+        particles.at(i).v = v + 0.5*k1_v.at(i)*dt;
+        particles.at(i).r = r + 0.5*k1_r.at(i)*dt;
+        
+    }
 
-        particles.at(i).r = particles.at(i).r + 0.5*k2_r(i)*dt;
-        particles.at(i).v = particles.at(i).v + 0.5*k2_v(i)*dt;
+    for (int i=0; i<particles.size(); i++)
+    {   
+        arma::vec F = total_force(i);
+        arma::vec v = particles.at(i).v;
 
-        k3_r = dt * particles.at(i).r + 0.5*k2_r(i);
-        k3_v = dt * total_force(i)/m;
+        k2_v.at(i) = dt * F/m;
+        k2_r.at(i) = dt * v;
+       
+    }
 
-        particles.at(i).r = particles.at(i).r + k3_r(i)*dt;
-        particles.at(i).v = particles.at(i).v + k3_v(i)*dt;
+    for (int i=0; i<particles.size(); i++)
+    {   
+        arma::vec v = particles_copy.at(i).v;
+        arma::vec r = particles_copy.at(i).r;
+        particles.at(i).v = v + 0.5*k2_v.at(i)*dt;
+        particles.at(i).r = r + 0.5*k2_r.at(i)*dt;
+        
+    }
 
-        k4_r = dt * particles.at(i).r + k3_r(i);
-        k4_v = dt * total_force(i)/m;
+    for (int i=0; i<particles.size(); i++)
+    {   
+        arma::vec F = total_force(i);
+        arma::vec v = particles.at(i).v;
+        k3_v.at(i) = dt * F/m;
+        k3_r.at(i) = dt * v;
+        
+    }
 
-        particles.at(i).r = particles_copy.at(i).r + 1/6.*(k1_r + 2*k2_r + 2*k3_r + k4_r );
-        particles.at(i).v = particles_copy.at(i).v + 1/6.*(k1_v + 2*k2_v + 2*k3_v + k4_v );
+    for (int i=0; i<particles.size(); i++)
+    {   
+        arma::vec v = particles_copy.at(i).v;
+        arma::vec r = particles_copy.at(i).r;
+        particles.at(i).v = v + k3_v.at(i)*dt;
+        particles.at(i).r = r + k3_r.at(i)*dt;
+        
+    }
+
+    for (int i=0; i<particles.size(); i++)
+    {   
+        arma::vec F = total_force(i);
+        arma::vec v = particles.at(i).v;  
+        k4_v.at(i) = dt * F/m;
+        k4_r.at(i) = dt * v;
+    }
+    for (int i=0; i<particles.size(); i++)
+    { 
+        arma::vec v = particles_copy.at(i).v;
+        arma::vec r = particles_copy.at(i).r;
+
+        particles.at(i).v = v + 1/6.*(k1_v.at(i) + 2.*k2_v.at(i) + 2.*k3_v.at(i) + k4_v.at(i) );
+        particles.at(i).r = r + 1/6.*(k1_r.at(i) + 2.*k2_r.at(i) + 2.*k3_r.at(i) + k4_r.at(i) );
+        
     }
     
 
@@ -167,11 +220,13 @@ arma::vec PenningTrap::total_force_particles(int i)
         arma::vec v = particles.at(i).v;
     
         int n_particles = particles.size();
+        if (n_particles>1){
         //calculate the force on particle_i from all the other particles
         for (int j = 0; j < n_particles; j++){
             if (j != i){
                 force_particles += force_particle(i,j);
             }
+        }
         }
          std::cout << "Total force from particles is:" << force_particles << std::endl;
         return force_particles;
