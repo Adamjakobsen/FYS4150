@@ -11,6 +11,7 @@ class PenningTrap
     public:
         // these are attributes aka variables (or constants) of a class
         double B0, V0, d;
+        bool interaction=true;
         std::vector<Particle> particles;
 
         PenningTrap(double B0_in, double V0_in, double d_in);
@@ -41,6 +42,10 @@ class PenningTrap
 
         // The total force on particle_i from both external fields and other particles
         arma::vec total_force(int i);
+
+        // Option to turn on/off the interaction between particles
+        void toggle_interaction(bool interaction);
+
 
 
 

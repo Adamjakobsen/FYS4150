@@ -8,7 +8,7 @@
 #include "./include/PenningTrap.hpp"
 
 void prettyprint(arma::vec armavec, std::string title, std::vector<std::string> labels);
-void RK4_data(int n_particles,int n_timesteps,double total_time);
+void RK4_data(int n_particles,int n_timesteps,double total_time, std::string inter);
 void Euler_data(int n_particles,int n_timesteps,double total_time);
 
 ///////// MAKING A PENNING TRAP AND MAKING IT GLOBALLY ACCESSIBLE /////////
@@ -28,8 +28,9 @@ PenningTrap PT = PenningTrap(B0, V0, d);
 // main function takes input arguments from the command line: Method, n_timesteps, total_time
 int main(int argc, char*argv[] )
 {   
+
     //If the user doesn't input the correct number of arguments, print an error message and exit
-    if (argc != 4)
+    if (argc != 5)
     {
         std::cout << "Error: Incorrect number of arguments. Please input the method, number of timesteps, and total time." << std::endl;
         return 1;
@@ -39,6 +40,23 @@ int main(int argc, char*argv[] )
     arma::vec v1 = arma::vec(std::vector<double> { 0, 25, 0 }); //micrometers per microsec
     arma::vec r2 = arma::vec(std::vector<double> { 25, 25, 0 }); //micrometers 
     arma::vec v2 = arma::vec(std::vector<double> { 0, 40, 5 }); //micrometers per microsec
+
+    //Option to turn interactions on and off
+    std::string inter=argv[4];
+    std::cout << inter <<"|" << "Type: " << typeid(inter).name() << std::endl;
+    if (inter == "on")
+    {
+        PT.toggle_interaction(true);
+    }
+    else if (inter == "off")
+    {
+        PT.toggle_interaction(false);
+    }
+    else
+    {
+        std::cout << "Error: Please input 'on' or 'off' for particle-particle interaction." << std::endl;
+        return 1;
+    }
     //remember to define correct elementary charge value here!!
     //here, I create object of type "Particle" using our class, which I call "particle1", and assign attributes to it such as 
     //charge, mass, position and velocity!
@@ -48,6 +66,10 @@ int main(int argc, char*argv[] )
     // Adding particles to the trap
     PT.add_particle(particle1);
     PT.add_particle(particle2);
+    
+
+
+
 
     // Define time step and number of time steps
     double total_time= atoi(argv[3]);
@@ -57,7 +79,7 @@ int main(int argc, char*argv[] )
     // If methis is Rk4, call RK4_data
     if (std::string(argv[1]) == "RK4")
     {
-        RK4_data(n_particles,N,total_time);
+        RK4_data(n_particles,N,total_time,inter);
     }
     // If method is Euler, call Euler_data
     else if (std::string(argv[1]) == "Euler")
@@ -72,18 +94,13 @@ int main(int argc, char*argv[] )
 
 
 
-    
-
-    
-    
-
-    
 
     return 0;
 }
+
 //Function for producing data with RK4
 
-void RK4_data(int n_particles,int n_timesteps,double total_time)
+void RK4_data(int n_particles,int n_timesteps,double total_time,std::string inter)
 {
     // Define time step and number of time steps
     double dt = total_time/n_timesteps;
@@ -92,26 +109,38 @@ void RK4_data(int n_particles,int n_timesteps,double total_time)
 
     // Format parameters
     std::ofstream outfile;
-	int width = 18;
-	int prec = 10;
+	int width = 25;
+	int prec = 15;
+    // make path to output file with the method, number of timesteps, and total time
+    std::string path_str = "./Data/RK4_"+std::to_string(n_particles)+"_" + std::to_string(n_timesteps) + inter + ".txt";
 
-    
-    outfile.open("positions_rk4.txt");
+    //const char *path=path_str;
+    outfile.open(path_str);
 
-    for (int j=0; j<n_particles; j++)
+    for (int j = 0; j < n_particles; j++)
     {
-    for (int i = 0; i < n_timesteps; i++) 
-        {
+        for (int i = 0; i < n_timesteps +1; i++) 
+            {
+            
+            PT.evolve_RK4(dt);
+            
+                outfile << 
+                std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
+                std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  
+                
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(0) << 
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(1) << 
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(2) <<  
+                std::endl;
+            
+            }
+    }
+    outfile.close();
+
+
+
         
-        PT.evolve_RK4(dt);
-        
-            outfile << 
-            std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
-            std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
-            std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  std::endl;
-        
-        }
-    }    
 
 }
 
@@ -126,26 +155,35 @@ void Euler_data(int n_particles,int n_timesteps,double total_time)
 
     // Format parameters
     std::ofstream outfile;
-    int width = 18;
-    int prec = 10;
+    int width = 25;
+    int prec = 15;
 
-    
-    outfile.open("positions_Euler.txt");
+        // make path to output file with the method, number of timesteps, and total time
+    std::string path_str = "./Data/Euler_" +std::to_string(n_particles)+"_"+ std::to_string(n_timesteps) + ".txt";
+    outfile.open(path_str);
 
-    for (int j=0; j<n_particles; j++)
+    for (int j = 0; j < n_particles; j++)
     {
-    for (int i = 0; i < n_timesteps; i++) 
-        {
-        
-        PT.evolve_forward_Euler(dt);
-        
-            outfile << 
-            std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
-            std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
-            std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  std::endl;
-        
-        }
-    }    
+        for (int i = 0; i < n_timesteps +1; i++) 
+            {
+            
+            PT.evolve_forward_Euler(dt);
+            
+                outfile << 
+                std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
+                std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  
+                
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(0) << 
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(1) << 
+                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(2) <<  
+                std::endl;
+                
+            
+            }
+    }
+    outfile.close();
+
 
 }
 

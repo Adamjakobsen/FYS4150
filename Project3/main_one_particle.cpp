@@ -28,6 +28,7 @@ PenningTrap PT = PenningTrap(B0, V0, d);
 // main function takes input arguments from the command line: Method, n_timesteps, total_time
 int main(int argc, char*argv[] )
 {   
+
     //If the user doesn't input the correct number of arguments, print an error message and exit
     if (argc != 4)
     {
@@ -69,15 +70,10 @@ int main(int argc, char*argv[] )
 
 
 
-    
-
-    
-    
-
-    
 
     return 0;
 }
+
 //Function for producing data with RK4
 
 void RK4_data(int n_particles,int n_timesteps,double total_time)
@@ -89,13 +85,15 @@ void RK4_data(int n_particles,int n_timesteps,double total_time)
 
     // Format parameters
     std::ofstream outfile;
-	int width = 18;
-	int prec = 10;
+	int width = 25;
+	int prec = 15;
+    // make path to output file with the method, number of timesteps, and total time
+    std::string path_str = "./Data/RK4_"+std::to_string(n_particles)+"_" + std::to_string(n_timesteps) + ".txt";
 
-    
-    outfile.open("positions_rk4.txt");
+    //const char *path=path_str;
+    outfile.open(path_str);
 
-    for (int i = 0; i < n_timesteps; i++) 
+    for (int i = 0; i < n_timesteps +1; i++) 
         {
         
         PT.evolve_RK4(dt);
@@ -103,9 +101,18 @@ void RK4_data(int n_particles,int n_timesteps,double total_time)
             outfile << 
             std::setw(width) << std::setprecision(prec) <<PT.particles.at(0).r.at(0) << 
             std::setw(width) << std::setprecision(prec) << PT.particles.at(0).r.at(1) << 
-            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  std::endl;
+            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  
+            
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).v.at(0) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).v.at(1) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).v.at(2) <<  
+            std::endl;
         
         }
+    outfile.close();
+
+
+
         
 
 }
@@ -121,14 +128,15 @@ void Euler_data(int n_particles,int n_timesteps,double total_time)
 
     // Format parameters
     std::ofstream outfile;
-    int width = 18;
-    int prec = 10;
+    int width = 25;
+    int prec = 15;
 
-    
-    outfile.open("positions_Euler.txt");
+        // make path to output file with the method, number of timesteps, and total time
+    std::string path_str = "./Data/Euler_" +std::to_string(n_particles)+"_"+ std::to_string(n_timesteps) + ".txt";
+    outfile.open(path_str);
 
 
-    for (int i = 0; i < n_timesteps; i++) 
+    for (int i = 0; i < n_timesteps +1; i++) 
         {
         
         PT.evolve_forward_Euler(dt);
@@ -136,10 +144,17 @@ void Euler_data(int n_particles,int n_timesteps,double total_time)
             outfile << 
             std::setw(width) << std::setprecision(prec) <<PT.particles.at(0).r.at(0) << 
             std::setw(width) << std::setprecision(prec) << PT.particles.at(0).r.at(1) << 
-            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  std::endl;
+            std::setw(width) << std::setprecision(prec)<< PT.particles.at(0).r.at(2) <<  
+            
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).v.at(0) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).v.at(1) << 
+            std::setw(width) << std::setprecision(prec) << PT.particles.at(0).v.at(2) <<  
+            std::endl;
+            
         
         }
-        
+    outfile.close();
+
 
 }
 

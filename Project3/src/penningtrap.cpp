@@ -17,7 +17,12 @@ void PenningTrap::add_particle(Particle p_in)
 {
     particles.push_back(p_in);
 }
+// Method for turning interaction on or off
+void PenningTrap::toggle_interaction(bool interaction)
+{
+    PenningTrap::interaction = interaction;
 
+}
 // External electric field at point r=(x,y,z)
 
 arma::vec PenningTrap::external_E_field(arma::vec r)
@@ -30,15 +35,15 @@ arma::vec PenningTrap::external_E_field(arma::vec r)
     double prefactor_value = V0/(d*d); //not sure if we even need this definition if we already know what the prefactor value is
     
     //derive with respect to all three components to find e-field 
-     std::cout << "External E-field is:" << arma::vec(std::vector<double> { prefactor_value * x, prefactor_value * y, -prefactor_value * 2. * z })<< std::endl;
     return arma::vec(std::vector<double> { prefactor_value * x, prefactor_value * y, -prefactor_value * 2. * z });
 }
 
 // External magnetic field at point r=(x,y,z)
+
 arma::vec PenningTrap::external_B_field(arma::vec r)
 {
+
 //include B-field here with z-direction, given by B-field strength
-    std::cout << "External B-field is:" << arma::vec(std::vector<double> { 0, 0, B0})<< std::endl;
     return arma::vec(std::vector<double> { 0, 0, B0});
 }
 
@@ -138,6 +143,15 @@ void PenningTrap::evolve_RK4(double dt)
 
         particles.at(i).v = v + 1/6.*(k1_v.at(i) + 2.*k2_v.at(i) + 2.*k3_v.at(i) + k4_v.at(i) );
         particles.at(i).r = r + 1/6.*(k1_r.at(i) + 2.*k2_r.at(i) + 2.*k3_r.at(i) + k4_r.at(i) );
+
+        //if norm of r for particle i is smaller than d, set v to zero
+        if (arma::norm(particles.at(i).r) > d && particles.at(i).q!=0)
+        {
+            particles.at(i).v = arma::vec(std::vector<double> {0,0,0});
+            particles.at(i).q=0;
+
+        }
+        
         
     }
     
@@ -154,7 +168,7 @@ void PenningTrap::evolve_forward_Euler(double dt)
         
 
         arma::vec r = particles.at(i).r;
-        arma::vec v = particles.at(i).v;
+        arma::vec v = particles.at(i) .v;
         arma::vec F = total_force(i);
         arma::vec a = F/m;
 
@@ -201,7 +215,6 @@ arma::vec PenningTrap::total_force_external(int i)
     //calculate the force on particle_i from the external fields
     force_external = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
 
-    std::cout << "Total external force is:" << force_external << std::endl;
     return force_external;
 
 }
@@ -210,35 +223,44 @@ arma::vec PenningTrap::total_force_external(int i)
 arma::vec PenningTrap::total_force_particles(int i)
 {
     
-        //define empty 3 dimentional vector for our force
-        arma::vec force_particles = arma::vec(3, arma::fill::zeros);
-    
-        //define some constants and other variables that will be used 
-        double q = particles.at(i).q;
-        double m = particles.at(i).m;
-        arma::vec r = particles.at(i).r;
-        arma::vec v = particles.at(i).v;
-    
-        int n_particles = particles.size();
-        if (n_particles>1){
-        //calculate the force on particle_i from all the other particles
-        for (int j = 0; j < n_particles; j++){
-            if (j != i){
-                force_particles += force_particle(i,j);
-            }
+    //define empty 3 dimentional vector for our force
+    arma::vec force_particles = arma::vec(3, arma::fill::zeros);
+
+    //define some constants and other variables that will be used 
+    double q = particles.at(i).q;
+    double m = particles.at(i).m;
+    arma::vec r = particles.at(i).r;
+    arma::vec v = particles.at(i).v;
+
+    int n_particles = particles.size();
+    if (n_particles>1){
+    //calculate the force on particle_i from all the other particles
+    for (int j = 0; j < n_particles; j++){
+        if (j != i){
+            force_particles += force_particle(i,j);
         }
-        }
-         std::cout << "Total force from particles is:" << force_particles << std::endl;
-        return force_particles;
+    }
+    }
+    return force_particles;
 
 }
 
 // The total force on particle_i from both external fields and other particles
 arma::vec PenningTrap::total_force(int i)
-{
+{   
+    
     arma::vec force_total = arma::vec(3, arma::fill::zeros);
-    force_total = total_force_external(i) + total_force_particles(i);
-    std::cout << "The total force is" << force_total << std::endl; 
+
+    if (interaction==false){
+        force_total = total_force_external(i);
+    }
+    else if (interaction==true){
+        force_total = total_force_external(i) + total_force_particles(i);
+    }
+    else{
+        std::cout << "Error: interaction must be 0 or 1" << std::endl;
+    }
+    
     return force_total;
 
 }
