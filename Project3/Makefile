@@ -8,4 +8,3 @@ run:
 	./main $(method) $(n) $(t) $(interaction)
 
 all: compile run
-
