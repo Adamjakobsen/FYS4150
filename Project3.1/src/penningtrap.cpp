@@ -41,7 +41,7 @@ arma::vec PenningTrap::external_E_field(arma::vec r)
 
 arma::vec PenningTrap::external_B_field(arma::vec r)
 {
-<<<<<<< HEAD
+
 
 //include B-field here with z-direction, given by B-field strength
     return arma::vec(std::vector<double> { 0, 0, B0});
@@ -156,20 +156,14 @@ void PenningTrap::evolve_RK4(double dt)
     }
     
 
-=======
     // include B-field here with z-direction, given by B-field strength
     return arma::vec(std::vector<double>{0, 0, B0});
 }
 
-// Evolve the system one time step (dt) using Runge-Kutta 4th order
-void PenningTrap::evolve_RK4(double dt)
-{
->>>>>>> 84745ab42bfbcda10086fca4a7f2c131e3bd7286
-}
 
 // Evolve the system one time step (dt) using Forward Euler
 void PenningTrap::evolve_forward_Euler(double dt)
-<<<<<<< HEAD
+
 {   
     for (int i = 0; i < particles.size(); i++)
     {
@@ -187,10 +181,7 @@ void PenningTrap::evolve_forward_Euler(double dt)
         particles.at(i).r=r+v*dt;
         particles.at(i).v= v + a*dt;
     }
-=======
-{
->>>>>>> 84745ab42bfbcda10086fca4a7f2c131e3bd7286
-}
+
 
 // Force on particle_i from particle_j
 arma::vec PenningTrap::force_particle(int i, int j)
@@ -215,7 +206,7 @@ arma::vec PenningTrap::force_particle(int i, int j)
 // The total force on particle_i from the external fields
 arma::vec PenningTrap::total_force_external(int i)
 {
-<<<<<<< HEAD
+
 
     //define empty 3 dimentional vector for our force
     arma::vec force_external = arma::vec(3, arma::fill::zeros);
@@ -231,14 +222,13 @@ arma::vec PenningTrap::total_force_external(int i)
 
     return force_external;
 
-=======
->>>>>>> 84745ab42bfbcda10086fca4a7f2c131e3bd7286
+
 }
 
 // The total force on particle_i from the other particles
 arma::vec PenningTrap::total_force_particles(int i)
 {
-<<<<<<< HEAD
+
     
     //define empty 3 dimentional vector for our force
     arma::vec force_particles = arma::vec(3, arma::fill::zeros);
@@ -259,14 +249,11 @@ arma::vec PenningTrap::total_force_particles(int i)
     }
     }
     return force_particles;
-
-=======
->>>>>>> 84745ab42bfbcda10086fca4a7f2c131e3bd7286
 }
 
 // The total force on particle_i from both external fields and other particles
 arma::vec PenningTrap::total_force(int i)
-<<<<<<< HEAD
+
 {   
     
     arma::vec force_total = arma::vec(3, arma::fill::zeros);
@@ -285,8 +272,3 @@ arma::vec PenningTrap::total_force(int i)
 
 }
 
-
-=======
-{
-}
->>>>>>> 84745ab42bfbcda10086fca4a7f2c131e3bd7286
