@@ -1,4 +1,4 @@
-#include "../Include/PenningTrap.hpp"
+#include "../include/PenningTrap.hpp"
 
 // Constructor
 PenningTrap::PenningTrap(double B0_in, double V0_in, double d_in)
