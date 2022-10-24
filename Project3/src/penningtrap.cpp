@@ -76,9 +76,10 @@ void PenningTrap::evolve_RK4(double dt)
         arma::vec v = particles.at(i).v;
         arma::vec F = total_force(i);
         
-        k1_r.at(i) = v*dt;
+        
         
         k1_v.at(i) = F/m*dt;
+        k1_r.at(i) = v*dt;
         
     }
 
@@ -187,7 +188,7 @@ arma::vec PenningTrap::force_particle(int i, int j)
     arma::vec force_ij = arma::vec(3, arma::fill::zeros);
 
     //define some constants and other variables that will be used 
-    double k_e = 1.38935333;
+    double k_e = 1.38935333*pow(10.,5.);
     double charges = particles.at(i).q * particles.at(j).q;
 
     //calculate the distance from particle_i to particle_j and find norm of the force
@@ -253,9 +254,12 @@ arma::vec PenningTrap::total_force(int i)
 
     if (interaction==false){
         force_total = total_force_external(i);
+        std::cout << "External force without interaction" << force_total << std::endl;
     }
     else if (interaction==true){
+
         force_total = total_force_external(i) + total_force_particles(i);
+        std::cout << "External with interactions"<< force_total << std::endl;
     }
     else{
         std::cout << "Error: interaction must be 0 or 1" << std::endl;

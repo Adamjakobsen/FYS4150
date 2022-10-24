@@ -30,17 +30,32 @@ int main(int argc, char*argv[] )
 {   
 
     //If the user doesn't input the correct number of arguments, print an error message and exit
-    if (argc != 5)
+    if (argc != 6)
     {
         std::cout << "Error: Incorrect number of arguments. Please input the method, number of timesteps, and total time." << std::endl;
         return 1;
     }
+    /* 
     //define your positions and velocities 
     arma::vec r1 = arma::vec(std::vector<double> { 20, 0, 20 }); //micrometers 
     arma::vec v1 = arma::vec(std::vector<double> { 0, 25, 0 }); //micrometers per microsec
     arma::vec r2 = arma::vec(std::vector<double> { 25, 25, 0 }); //micrometers 
     arma::vec v2 = arma::vec(std::vector<double> { 0, 40, 5 }); //micrometers per microsec
+     */
+    //Defining number of particles from input
+    int n_particles = atoi(argv[5]);
 
+    for (int i=0; i<n_particles; i++)
+    {
+        //Defining positions and velocities from input
+        arma::vec r = arma::vec(3).randn()*0.1*d; //micrometers
+        std::cout << "r = " << r << std::endl;
+        arma::vec v = arma::vec(3).randn()*0.1*d; //micrometers per microsec
+
+        //Defining particles and adding them to the Penning Trap
+        Particle p = Particle(q, m, r, v);
+        PT.add_particle(p);
+    }
     //Option to turn interactions on and off
     std::string inter=argv[4];
     std::cout << inter <<"|" << "Type: " << typeid(inter).name() << std::endl;
@@ -57,15 +72,7 @@ int main(int argc, char*argv[] )
         std::cout << "Error: Please input 'on' or 'off' for particle-particle interaction." << std::endl;
         return 1;
     }
-    //remember to define correct elementary charge value here!!
-    //here, I create object of type "Particle" using our class, which I call "particle1", and assign attributes to it such as 
-    //charge, mass, position and velocity!
-    Particle particle1 = Particle(q, m, r1, v1);
-    //I do the same thing here, just for the second particle 
-    Particle particle2 = Particle(q, m, r2, v2);
-    // Adding particles to the trap
-    PT.add_particle(particle1);
-    PT.add_particle(particle2);
+    
     
 
 
@@ -75,7 +82,6 @@ int main(int argc, char*argv[] )
     double total_time= atoi(argv[3]);
     int N = atoi(argv[2]);
     double dt = total_time/N;
-    int n_particles = PT.particles.size();
     // If methis is Rk4, call RK4_data
     if (std::string(argv[1]) == "RK4")
     {
