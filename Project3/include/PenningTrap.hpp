@@ -11,7 +11,8 @@ class PenningTrap
     public:
         // these are attributes aka variables (or constants) of a class
         double B0, V0, d;
-        bool interaction=true;
+        bool interaction;
+        bool perturbation;
         std::vector<Particle> particles;
 
         PenningTrap(double B0_in, double V0_in, double d_in);
@@ -45,6 +46,12 @@ class PenningTrap
 
         // Option to turn on/off the interaction between particles
         void toggle_interaction(bool interaction);
+
+        // External E_field with perturbation
+        arma::vec external_E_field_perturbed(arma::vec r, double t, double omega,double f);
+
+        // Option to turn on/off the perturbation
+        void toggle_perturbation(bool perturbation);
 
 
 

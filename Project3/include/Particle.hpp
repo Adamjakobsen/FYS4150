@@ -10,6 +10,8 @@ class Particle
         double q, m;
         arma::vec r, v;
 
+        double time;
+
         Particle(double q_in, double m_in, arma::vec r_in, arma::vec v_in);
         void print_attributes();
 };

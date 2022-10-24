@@ -87,20 +87,18 @@ class Utils():
             vx=np.zeros((self.n_particles,n))
             vy=np.zeros((self.n_particles,n))
             vz=np.zeros((self.n_particles,n))
-
+            
+            j_column=data[:,6]
             for i in range(self.n_particles):
-                first = i*n
-                last=i*n + self.n_timesteps+1
-                print(np.shape(data[first:last,0]))
-                print(first)
-                print(last)
-                x[i,:] = data[first:last,0]
-                y[i,:] = data[first:last,1]
-                z[i,:] = data[first:last,2]
+
+                index_p=np.where(j_column==i)
+                x[i,:] = data[index_p,0]
+                y[i,:] = data[index_p,1]
+                z[i,:] = data[index_p,2]
                 
-                vx[i,:] = data[first:last,3]
-                vy[i,:] = data[first:last,4]
-                vz[i,:] = data[first:last,5]
+                vx[i,:] = data[index_p,3]
+                vy[i,:] = data[index_p,4]
+                vz[i,:] = data[index_p,5]
         return t,x,y,z,vx,vy,vz
             
 

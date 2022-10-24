@@ -54,7 +54,9 @@ int main(int argc, char*argv[] )
 
         //Defining particles and adding them to the Penning Trap
         Particle p = Particle(q, m, r, v);
+        
         PT.add_particle(p);
+        PT.particles.at(i).time=0;
     }
     //Option to turn interactions on and off
     std::string inter=argv[4];
@@ -110,6 +112,7 @@ void RK4_data(int n_particles,int n_timesteps,double total_time,std::string inte
 {
     // Define time step and number of time steps
     double dt = total_time/n_timesteps;
+    std::cout << "dt = " << dt << "total time:" << total_time << "timesteps: "<< n_timesteps<<std::endl;
     
     // Use rk4 to evolve and write to file
 
@@ -123,25 +126,29 @@ void RK4_data(int n_particles,int n_timesteps,double total_time,std::string inte
     //const char *path=path_str;
     outfile.open(path_str);
 
-    for (int j = 0; j < n_particles; j++)
-    {
-        for (int i = 0; i < n_timesteps +1; i++) 
-            {
-            
+
+    for (int i = 0; i < n_timesteps +1; i++) 
+    {   
             PT.evolve_RK4(dt);
             
-                outfile << 
-                std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
-                std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  
+        for (int j = 0; j < n_particles; j++)
+                    {
+                PT.particles.at(j).time+=dt;
+                //std::cout << "particle " << j << " has position " << PT.particles.at(j).r << " and velocity " << PT.particles.at(j).v << "at time : t="<<PT.particles.at(j).time<< std::endl;
                 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(0) << 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(1) << 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(2) <<  
-                std::endl;
-            
+                    outfile << 
+                    std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
+                    std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  
+                    
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(0) << 
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(1) << 
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(2) <<
+                    std::setw(width) << std::setprecision(prec) << j << std::endl;
+                    }
             }
-    }
+        
+        
     outfile.close();
 
 

@@ -1,4 +1,5 @@
 #include "../include/PenningTrap.hpp"
+#include <cmath>
 
 // Constructor 
 PenningTrap::PenningTrap(double B0_in, double V0_in, double d_in)
@@ -23,6 +24,11 @@ void PenningTrap::toggle_interaction(bool interaction)
     PenningTrap::interaction = interaction;
 
 }
+//Method for turning on perturbation
+void PenningTrap::toggle_perturbation(bool perturbation)
+{
+    PenningTrap::perturbation = perturbation;
+}
 // External electric field at point r=(x,y,z)
 
 arma::vec PenningTrap::external_E_field(arma::vec r)
@@ -38,6 +44,19 @@ arma::vec PenningTrap::external_E_field(arma::vec r)
     return arma::vec(std::vector<double> { prefactor_value * x, prefactor_value * y, -prefactor_value * 2. * z });
 }
 
+// External E-field with perturbation
+arma::vec PenningTrap::external_E_field_perturbed(arma::vec r, double t, double omega,double f)
+{
+    double x = r(0);
+    double y = r(1);
+    double z = r(2);
+
+    //define the potential given in the exercise
+    double prefactor_value = V0*(1. + f*cos(omega*t)); //not sure if we even need this definition if we already know what the prefactor value is
+    
+    //derive with respect to all three components to find e-field 
+    return arma::vec(std::vector<double> { prefactor_value * x, prefactor_value * y, -prefactor_value * 2. * z });
+}
 // External magnetic field at point r=(x,y,z)
 
 arma::vec PenningTrap::external_B_field(arma::vec r)
@@ -254,12 +273,12 @@ arma::vec PenningTrap::total_force(int i)
 
     if (interaction==false){
         force_total = total_force_external(i);
-        std::cout << "External force without interaction" << force_total << std::endl;
+
     }
     else if (interaction==true){
 
         force_total = total_force_external(i) + total_force_particles(i);
-        std::cout << "External with interactions"<< force_total << std::endl;
+
     }
     else{
         std::cout << "Error: interaction must be 0 or 1" << std::endl;

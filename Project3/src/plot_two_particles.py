@@ -4,9 +4,9 @@ from Utils import *
 
 
 #RK4
-n_steps=32000
+n_steps=50000
 n_particles=2
-filename=f"RK4_{n_particles}_{n_steps}on.txt"
+filename=f"RK4_{n_particles}_{n_steps}off.txt"
 #filename="RK4_2_50000.txt"
 utils=Utils(n_steps,50,2)
 t,x,y,z,vx,vy,vz=utils.get_data(filename)
@@ -42,8 +42,8 @@ plt.scatter(x_particle1[-1],y_particle1[-1],c="g",label="End position")
 plt.xlabel(r"x [$\mu$m]")
 plt.ylabel(r"y [$\mu$m]")
 plt.legend()
-plt.savefig("../Fig/RK4_2_particles_xy_plane_on.pdf")
-plt.close()
+plt.savefig("../Fig/RK4_2_particles_xy_plane_off.pdf")
+plt.show()
 
 #Plot both particles phase space
 
@@ -54,7 +54,7 @@ plt.plot(x_particle2,vx_particle2,label="Particle 2")
 plt.xlabel(r"x [$\mu$m]")
 plt.ylabel(r"v_x [$\mu$m/$\mu$s]")
 plt.legend()
-plt.savefig("../Fig/RK4_2_particles_phase_x_on.pdf")
+plt.savefig("../Fig/RK4_2_particles_phase_x_off.pdf")
 plt.close()
 
 plt.plot(vx_particle1,vy_particle1,label="Particle 1")
@@ -62,6 +62,6 @@ plt.plot(vx_particle2,vy_particle2,label="Particle 2")
 plt.xlabel(r"z [$\mu$m]")
 plt.ylabel(r"v_z [$\mu$m/$\mu$s]")
 plt.legend()
-plt.savefig("../Fig/RK4_2_particles_phase_z_on.pdf")
+plt.savefig("../Fig/RK4_2_particles_phase_z_off.pdf")
 plt.close()
 
