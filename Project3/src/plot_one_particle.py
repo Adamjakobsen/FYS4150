@@ -101,3 +101,48 @@ plt.yscale("log")
 plt.legend()
 plt.savefig("../Fig/Euler_relative_error.pdf")
 plt.close()
+
+
+#######Error convergence rate RK4########
+filenames=[f"RK4_{n_particles}_{n_steps}.txt" for n_steps in N_list ]
+h_list=[1/n_steps for n_steps in N_list]
+max_error_list=[]
+for i in range(len(N_list)):
+    n_steps=N_list[i]
+    filename=filenames[i]
+    utils=Utils(n_steps,50)
+    t,x,y,z,vx,vy,vz=utils.get_data(filename)
+    x_analytical,y_analytical,z_analytical=utils.analytical()
+    r_analytical=np.sqrt(x_analytical**2 + y_analytical**2 + z_analytical**2)
+    r=np.sqrt(x**2 + y**2 + z**2)
+    #Estimating the error convergence rate
+    max_error_list.append(np.max(np.abs(r_analytical-r)))
+r_err = 0
+print(f'max errors: {max_error_list}')
+print(f'h values: {h_list}')
+
+for i in range(1,4):
+    r_err += 1/3*np.log(max_error_list[i]/max_error_list[i-1])/np.log(h_list[i]/h_list[i-1])
+
+print(f"Error convergence rate RK4: {r_err}")
+
+
+#######Error convergence rate Forward Euler########
+filenames=[f"Euler_{n_particles}_{n_steps}.txt" for n_steps in N_list ]
+h_list=[1/n_steps for n_steps in N_list]
+max_error_list=[]
+for i in range(len(N_list)):
+    n_steps=N_list[i]
+    filename=filenames[i]
+    utils=Utils(n_steps,50)
+    x_analytical,y_analytical,z_analytical=utils.analytical()
+    t,x,y,z,vx,vy,vz=utils.get_data(filename)
+    r_analytical=np.sqrt(x_analytical**2 + y_analytical**2 + z_analytical**2)
+    r=np.sqrt(x**2 + y**2 + z**2)
+    #Estimating the error convergence rate
+    max_error_list.append(np.max(np.abs(r_analytical-r)))
+r_err = 0
+for i in range(1,4):
+    r_err += 1/3*np.log(max_error_list[i]/max_error_list[i-1])/np.log(h_list[i]/h_list[i-1])
+
+print(f"Error convergence rate Forward Euler: {r_err}")
