@@ -89,15 +89,15 @@ void PenningTrap::evolve_RK4(double dt)
     std::vector<arma::vec> k4_v(n_particles);
 
     
-    
+    //Using forward Euler to move all particles one time-step
+    //evolve_forward_Euler(dt); // *** I added this, this is similar to what i think we should do
+
     for (int i=0; i<particles.size(); i++)
     {   
         arma::vec v = particles.at(i).v;
         arma::vec F = total_force(i);
         
-        
-        
-        k1_v.at(i) = F/m*dt;
+        k1_v.at(i) = (F/m)*dt;
         k1_r.at(i) = v*dt;
         
     }
@@ -107,8 +107,8 @@ void PenningTrap::evolve_RK4(double dt)
         arma::vec v = particles_copy.at(i).v;
         arma::vec r = particles_copy.at(i).r;
 
-        particles.at(i).v = v + 0.5*k1_v.at(i)*dt;
-        particles.at(i).r = r + 0.5*k1_r.at(i)*dt;
+        particles.at(i).v = v + 0.5*k1_v.at(i);  //*** deleted dt
+        particles.at(i).r = r + 0.5*k1_r.at(i); //*** deleted dt
         
     }
 
@@ -125,9 +125,9 @@ void PenningTrap::evolve_RK4(double dt)
     for (int i=0; i<particles.size(); i++)
     {   
         arma::vec v = particles_copy.at(i).v;
-        arma::vec r = particles_copy.at(i).r;
-        particles.at(i).v = v + 0.5*k2_v.at(i)*dt;
-        particles.at(i).r = r + 0.5*k2_r.at(i)*dt;
+        arma::vec r = particles_copy.at(i).r; 
+        particles.at(i).v = v + 0.5*k2_v.at(i);  //*** deleted dt
+        particles.at(i).r = r + 0.5*k2_r.at(i); //*** deleted dt
         
     }
 
@@ -144,8 +144,8 @@ void PenningTrap::evolve_RK4(double dt)
     {   
         arma::vec v = particles_copy.at(i).v;
         arma::vec r = particles_copy.at(i).r;
-        particles.at(i).v = v + k3_v.at(i)*dt;
-        particles.at(i).r = r + k3_r.at(i)*dt;
+        particles.at(i).v = v + k3_v.at(i);  //*** deleted dt
+        particles.at(i).r = r + k3_r.at(i); //*** deleted dt
         
     }
 
@@ -154,7 +154,7 @@ void PenningTrap::evolve_RK4(double dt)
         arma::vec F = total_force(i);
         arma::vec v = particles.at(i).v;  
         k4_v.at(i) = dt * F/m;
-        k4_r.at(i) = dt * v;
+        k4_r.at(i) = dt * v; 
     }
     for (int i=0; i<particles.size(); i++)
     { 
@@ -180,7 +180,9 @@ void PenningTrap::evolve_RK4(double dt)
 
 // Evolve the system one time step (dt) using Forward Euler
 void PenningTrap::evolve_forward_Euler(double dt)
-{   
+{
+    std::vector<Particle> particles_new = particles;
+
     for (int i = 0; i < particles.size(); i++)
     {
         double q=particles.at(i).q;
@@ -188,14 +190,22 @@ void PenningTrap::evolve_forward_Euler(double dt)
         
 
         arma::vec r = particles.at(i).r;
-        arma::vec v = particles.at(i) .v;
+        arma::vec v = particles.at(i).v;
         arma::vec F = total_force(i);
         arma::vec a = F/m;
 
 
         //Evolve using foward euler
-        particles.at(i).r=r+v*dt;
-        particles.at(i).v= v + a*dt;
+        particles_new.at(i).r=r+v*dt;
+        particles_new.at(i).v= v + a*dt;
+    }
+
+    // update all global particles *** updates how?
+    // ***  This is what Even added
+    for (int i=0; i < particles.size(); i++)
+    {
+    particles.at(i).r = particles_new.at(i).r;
+    particles.at(i).v = particles_new.at(i).v;
     }
 }
 
