@@ -175,12 +175,12 @@ void Euler_data(int n_particles,int n_timesteps,double total_time)
     std::string path_str = "./Data/Euler_" +std::to_string(n_particles)+"_"+ std::to_string(n_timesteps) + ".txt";
     outfile.open(path_str);
 
-    for (int j = 0; j < n_particles; j++)
-    {
         for (int i = 0; i < n_timesteps +1; i++) 
-            {
+    {   
+            PT.evolve_RK4(dt);
             
-            PT.evolve_forward_Euler(dt);
+        for (int j = 0; j < n_particles; j++)
+        {
             
                 outfile << 
                 std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 

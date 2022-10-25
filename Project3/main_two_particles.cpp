@@ -117,25 +117,26 @@ void RK4_data(int n_particles,int n_timesteps,double total_time,std::string inte
     //const char *path=path_str;
     outfile.open(path_str);
 
-    for (int j = 0; j < n_particles; j++)
-    {
-        for (int i = 0; i < n_timesteps +1; i++) 
-            {
-            
+    for (int i = 0; i < n_timesteps +1; i++) 
+    {   
             PT.evolve_RK4(dt);
             
-                outfile << 
-                std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
-                std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  
+        for (int j = 0; j < n_particles; j++)
+                    {
+                PT.particles.at(j).time+=dt;
+                //std::cout << "particle " << j << " has position " << PT.particles.at(j).r << " and velocity " << PT.particles.at(j).v << "at time : t="<<PT.particles.at(j).time<< std::endl;
                 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(0) << 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(1) << 
-                std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(2) <<  
-                std::endl;
-            
+                    outfile << 
+                    std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).r.at(1) << 
+                    std::setw(width) << std::setprecision(prec)<< PT.particles.at(j).r.at(2) <<  
+                    
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(0) << 
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(1) << 
+                    std::setw(width) << std::setprecision(prec) << PT.particles.at(j).v.at(2) <<
+                    std::setw(width) << std::setprecision(prec) << j << std::endl;
+                    }
             }
-    }
     outfile.close();
 
 
@@ -162,12 +163,12 @@ void Euler_data(int n_particles,int n_timesteps,double total_time)
     std::string path_str = "./Data/Euler_" +std::to_string(n_particles)+"_"+ std::to_string(n_timesteps) + ".txt";
     outfile.open(path_str);
 
-    for (int j = 0; j < n_particles; j++)
-    {
-        for (int i = 0; i < n_timesteps +1; i++) 
-            {
+    for (int i = 0; i < n_timesteps +1; i++) 
+    {   
+            PT.evolve_RK4(dt);
             
-            PT.evolve_forward_Euler(dt);
+        for (int j = 0; j < n_particles; j++)
+        {
             
                 outfile << 
                 std::setw(width) << std::setprecision(prec) <<PT.particles.at(j).r.at(0) << 
