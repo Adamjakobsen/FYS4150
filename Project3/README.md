@@ -15,7 +15,7 @@ make compile_two
 Run:
 
 ```
-make run method=RK4/Euler n=number of time steps t= total simaluation time interaction=on/off
+make run method=RK4/Euler n=number of time steps t=total simaluation time interaction=on/off
 ```
 
 
