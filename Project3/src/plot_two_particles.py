@@ -4,7 +4,7 @@ from Utils import *
 
 
 #RK4
-n_steps=50000
+n_steps=32000
 n_particles=2
 filename=f"RK4_{n_particles}_{n_steps}off.txt"
 #filename="RK4_2_50000.txt"
@@ -29,6 +29,7 @@ z_particle2=z[1,:]
 vx_particle2=vx[1,:]
 vy_particle2=vy[1,:]
 vz_particle2=vz[1,:]
+
 
 #Plot both particles in xy plane
 plt.plot(x_particle1,y_particle1,label="Particle 1")
@@ -57,8 +58,8 @@ plt.legend()
 plt.savefig("../Fig/RK4_2_particles_phase_x_off.pdf")
 plt.close()
 
-plt.plot(vx_particle1,vy_particle1,label="Particle 1")
-plt.plot(vx_particle2,vy_particle2,label="Particle 2")
+plt.plot(z_particle1,vz_particle1,label="Particle 1")
+plt.plot(z_particle2,vz_particle2,label="Particle 2")
 plt.xlabel(r"z [$\mu$m]")
 plt.ylabel(r"v_z [$\mu$m/$\mu$s]")
 plt.legend()
