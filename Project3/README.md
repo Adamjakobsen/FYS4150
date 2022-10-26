@@ -2,7 +2,7 @@
 
 ## Compiling and running
 
-### One particle:
+### Compiling one particle:
 
 ```
 make compile_one
@@ -10,9 +10,9 @@ make compile_one
 ### Run:
 
 ```
-make run method=RK4/Euler n=number of time steps t=total simaluation time interaction=on/off
+./main method n_timesteps total_time 
 ```
-### Two particles:
+### Compiling two particles:
 
 ```
 make compile_two
@@ -21,8 +21,29 @@ make compile_two
 ### Run:
 
 ```
-make run method=RK4/Euler n=number of time steps t=total simaluation time interaction=on/off
+./main method n_timesteps total_time intercation 
 ```
 
+### Compiling multiple particles:
+```
+make compile_multi
+```
 
+### Run
+
+```
+./main method n_timesteps total_time intercation n_particles
+```
+
+### Compiling with perturbation:
+
+```
+make compile_perturb
+```
+
+### Run
+
+```
+./main method n_timesteps total_time intercation n_particles
+```
 
