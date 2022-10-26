@@ -60,9 +60,9 @@ class Utils():
     def relative_error(self,analytical,numerical):
         #Analytical solution passes through zero several times, so we shift both the numerical and analytical solution in order to avoid dividing by zero
 
-        max_diff=np.max(analytical) - np.min(analytical)
-        analytical += max_diff + 1
-        numerical += max_diff + 1
+        max_diff = np.max(analytical) - np.min(analytical)
+        analytical += 2*max_diff 
+        numerical += 2*max_diff
 
         return np.abs((analytical-numerical)/analytical)
 
@@ -178,9 +178,11 @@ if __name__ == '__main__':
         utils=Utils(n_steps,50)
         t,x,y,z,vx,vy,vz=utils.get_data(filename)
         x_analytical,y_analytical,z_analytical=utils.analytical()
+
         r_analytical=np.sqrt(x_analytical**2 + y_analytical**2 + z_analytical**2)
-        r=np.sqrt(x**2 + y**2 + z**2)
-        plt.plot(t,utils.relative_error(r_analytical,r),label=f"{n_steps} steps")
+        r_num=np.sqrt(x**2 + y**2 + z**2)
+
+        plt.plot(t,utils.relative_error(r_analytical,r_num),label=f"{n_steps} steps")
         
     plt.xlabel(r"Time [$\mu$s]")
     plt.ylabel("Relative error")

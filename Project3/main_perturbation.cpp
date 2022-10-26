@@ -57,7 +57,7 @@ int main(int argc, char*argv[] )
 
     for (int f_i=0;f_i< 3;f_i++)
 
-    {   
+    {   std::cout << "Amplitude: " << amplitude_list(f_i) << std::endl;
         // Format parameters
         std::ofstream outfile;
         int width = 25;
@@ -68,7 +68,7 @@ int main(int argc, char*argv[] )
         //const char *path=path_str;
         outfile.open(path_str);
         for (int omega_i=0; omega_i<100; omega_i++)
-        {   //std::cout << "Inside second loopyboii" << std::endl;
+        {   std::cout << "Freqquency:"<< frequency_list(omega_i)  << std::endl;
             
             PenningTrap PT = PenningTrap(B0, V0, d);
             //Turning on perturbation
@@ -77,7 +77,7 @@ int main(int argc, char*argv[] )
         {
             //Defining positions and velocities from input
             arma::vec r = arma::vec(3).randn()*0.1*d; //micrometers
-            std::cout << "r = " << r << std::endl;
+            //std::cout << "r = " << r << std::endl;
             arma::vec v = arma::vec(3).randn()*0.1*d; //micrometers per microsec
 
             //Defining particles and adding them to the Penning Trap

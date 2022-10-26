@@ -124,7 +124,7 @@ void Euler_data(int n_particles,int n_timesteps,double total_time)
     // Define time step and number of time steps
     double dt = total_time/n_timesteps;
     
-    // Use rk4 to evolve and write to file
+    // Use Euler to evolve and write to file
 
     // Format parameters
     std::ofstream outfile;

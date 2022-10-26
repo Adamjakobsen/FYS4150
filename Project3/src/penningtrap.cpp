@@ -186,7 +186,7 @@ void PenningTrap::evolve_RK4(double dt)
         particles.at(i).r = r + 1/6.*(k1_r.at(i) + 2.*k2_r.at(i) + 2.*k3_r.at(i) + k4_r.at(i) );
 
         //if norm of r for particle i is slarger than d, set v to zero
-        if (arma::norm(particles.at(i).r) > d && particles.at(i).q!=0)
+        if (norm(particles.at(i).r) > d && particles.at(i).q!=0)
         {
             particles.at(i).v = arma::vec(std::vector<double> {0,0,0});
             particles.at(i).q=0.0;
@@ -243,7 +243,7 @@ arma::vec PenningTrap::force_particle(int i, int j)
 
     //calculate the distance from particle_i to particle_j and find norm of the force
     arma::vec distance_ij = particles.at(i).r - particles.at(j).r;
-    double distance_ij_norm = arma::norm(distance_ij, 1);
+    double distance_ij_norm = norm(distance_ij);
 
     //calculate the force on particle_i from particle_j
     force_ij = (k_e*charges * distance_ij ) / (pow(distance_ij_norm,3));
