@@ -1,6 +1,12 @@
 # Project 3:
 
 ## Compiling and running
+### inputs: 
+
+method: Use "RK4" or "Euler"
+n_particles: number of particles (int)
+total_time: Total simulation time (int)
+intercation: Use "on" or "off"
 
 ### Compiling one particle:
 
