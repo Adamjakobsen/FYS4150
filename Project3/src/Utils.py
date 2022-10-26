@@ -59,12 +59,12 @@ class Utils():
     
     def relative_error(self,analytical,numerical):
         #Analytical solution passes through zero several times, so we shift both the numerical and analytical solution in order to avoid dividing by zero
+        
+        max_diff = np.max(analytical) - np.min(analytical)
+        analytical += 2*max_diff
+        numerical += 2*max_diff
 
-        max_diff=np.max(analytical) - np.min(analytical)
-        analytical += max_diff + 1
-        numerical += max_diff + 1
-
-        return np.abs((analytical-numerical)/analytical)
+        return np.linalg.norm((analytical-numerical)/np.linalg.norm(analytical,axis=0),axis=0)
 
     def get_data(self,filename):
         data = np.loadtxt(f'../Data/{filename}')
@@ -112,53 +112,53 @@ if __name__ == '__main__':
 
     ############### X(t),Y(t) and Z(t) with TK4 ################
     
-    for i in range(len(N_list)):
-        n_steps=N_list[i]
-        filename=filenames[i]
-        utils=Utils(n_steps,50)
-        t,x,y,z,vx,vy,vz=utils.get_data(filename)
-        x_analytical,y_analytical,z_analytical=utils.analytical()
-        plt.plot(t,x_analytical,label="Analytical")
-        plt.plot(t,x,linestyle='dashed',label=f"Numerical n = {N_list[i]}")
-        plt.legend()
-        plt.xlabel(r"Time [$\mu$s]")
-        plt.ylabel(r"x(t) [$\mu$m]")
-        plt.savefig(f"../Fig/RK4_1_particle_x(t)_{n_steps}_steps.pdf")
-        plt.close()
+    # for i in range(len(N_list)):
+    #     n_steps=N_list[i]
+    #     filename=filenames[i]
+    #     utils=Utils(n_steps,50)
+    #     t,x,y,z,vx,vy,vz=utils.get_data(filename)
+    #     x_analytical,y_analytical,z_analytical=utils.analytical()
+    #     plt.plot(t,x_analytical,label="Analytical")
+    #     plt.plot(t,x,linestyle='dashed',label=f"Numerical n = {N_list[i]}")
+    #     plt.legend()
+    #     plt.xlabel(r"Time [$\mu$s]")
+    #     plt.ylabel(r"x(t) [$\mu$m]")
+    #     plt.savefig(f"../Fig/RK4_1_particle_x(t)_{n_steps}_steps.pdf")
+    #     plt.close()
 
     
-    ####Y(t)########
+    # ####Y(t)########
     
-    for i in range(len(N_list)):
-        n_steps=N_list[i]
-        filename=filenames[i]
-        utils=Utils(n_steps,50)
-        t,x,y,z,vx,vy,vz=utils.get_data(filename)
-        x_analytical,y_analytical,z_analytical=utils.analytical()
-        plt.plot(t,y_analytical,label="Analytical")
-        plt.plot(t,y,linestyle='dashed',label=f"Numerical n = {N_list[i]}")
-        plt.savefig(f"../Fig/RK4_1_particle_y(t)_{n_steps}_steps.pdf")
-        plt.legend()
-        plt.xlabel(r"Time [$\mu$s]")
-        plt.ylabel(r"y(t) [$\mu$m]")
-        plt.close()
+    # for i in range(len(N_list)):
+    #     n_steps=N_list[i]
+    #     filename=filenames[i]
+    #     utils=Utils(n_steps,50)
+    #     t,x,y,z,vx,vy,vz=utils.get_data(filename)
+    #     x_analytical,y_analytical,z_analytical=utils.analytical()
+    #     plt.plot(t,y_analytical,label="Analytical")
+    #     plt.plot(t,y,linestyle='dashed',label=f"Numerical n = {N_list[i]}")
+    #     plt.savefig(f"../Fig/RK4_1_particle_y(t)_{n_steps}_steps.pdf")
+    #     plt.legend()
+    #     plt.xlabel(r"Time [$\mu$s]")
+    #     plt.ylabel(r"y(t) [$\mu$m]")
+    #     plt.close()
 
     
-    ####Z(t)########
+    # ####Z(t)########
     
-    for i in range(len(N_list)):
-        n_steps=N_list[i]
-        filename=filenames[i]
-        utils=Utils(n_steps,50)
-        t,x,y,z,vx,vy,vz=utils.get_data(filename)
-        x_analytical,y_analytical,z_analytical=utils.analytical()
-        plt.plot(t,z_analytical,label="Analytical")
-        plt.plot(t,z,linestyle='dashed',label=f"Numerical n = {N_list[i]}")
-        plt.xlabel(r"Time [$\mu$s]")
-        plt.ylabel(r"z(t) [$\mu$m]")
-        plt.legend()
-        plt.savefig(f"../Fig/RK4_1_particle_z(t)_{n_steps}_steps.pdf")
-        plt.close()
+    # for i in range(len(N_list)):
+    #     n_steps=N_list[i]
+    #     filename=filenames[i]
+    #     utils=Utils(n_steps,50)
+    #     t,x,y,z,vx,vy,vz=utils.get_data(filename)
+    #     x_analytical,y_analytical,z_analytical=utils.analytical()
+    #     plt.plot(t,z_analytical,label="Analytical")
+    #     plt.plot(t,z,linestyle='dashed',label=f"Numerical n = {N_list[i]}")
+    #     plt.xlabel(r"Time [$\mu$s]")
+    #     plt.ylabel(r"z(t) [$\mu$m]")
+    #     plt.legend()
+    #     plt.savefig(f"../Fig/RK4_1_particle_z(t)_{n_steps}_steps.pdf")
+    #     plt.close()
 
 
 
@@ -175,10 +175,14 @@ if __name__ == '__main__':
         filename=filenames[i]
         utils=Utils(n_steps,50)
         t,x,y,z,vx,vy,vz=utils.get_data(filename)
+        # t=np.linspace(0,50,n_steps)
         x_analytical,y_analytical,z_analytical=utils.analytical()
-        r_analytical=np.sqrt(x_analytical**2 + y_analytical**2 + z_analytical**2)
-        r=np.sqrt(x**2 + y**2 + z**2)
-        plt.plot(t,utils.relative_error(r_analytical,r),label=f"{n_steps} steps")
+        r_analytical=np.array([x_analytical, y_analytical,  z_analytical])
+        r_num =np.array([x, y, z])
+        
+        # np.insert(r_num, 0, np.sqrt(2*(20**2)))
+        
+        plt.plot(t, utils.relative_error(r_analytical, r_num),label=f"{n_steps} steps")
         
     plt.xlabel(r"Time [$\mu$s]")
     plt.ylabel("Relative error")
@@ -189,22 +193,22 @@ if __name__ == '__main__':
     
 
     #Euler
-    filenames=[f"Euler_{n_particles}_{n_steps}.txt" for n_steps in N_list ]
-    for i in range(len(N_list)):
-        n_steps=N_list[i]
-        filename=filenames[i]
-        utils=Utils(n_steps,50)
-        t,x,y,z,vx,vy,vz=utils.get_data(filename)
-        x_analytical,y_analytical,z_analytical=utils.analytical()
-        r_analytical=np.sqrt(x_analytical**2 + y_analytical**2 + z_analytical**2)
-        r=np.sqrt(x**2 + y**2 + z**2)
-        plt.plot(t,utils.relative_error(r_analytical,r),label=f"{n_steps} steps")
-    plt.xlabel(r"Time [$\mu$s]")
-    plt.ylabel("Relative error")
-    plt.yscale("log")
-    plt.legend()
-    plt.savefig("../Fig/Euler_relative_error_.pdf")
-    plt.close()
+    # filenames=[f"Euler_{n_particles}_{n_steps}.txt" for n_steps in N_list ]
+    # for i in range(len(N_list)):
+    #     n_steps=N_list[i]
+    #     filename=filenames[i]
+    #     utils=Utils(n_steps,50)
+    #     t,x,y,z,vx,vy,vz=utils.get_data(filename)
+    #     x_analytical,y_analytical,z_analytical=utils.analytical()
+    #     r_analytical=np.sqrt(x_analytical**2 + y_analytical**2 + z_analytical**2)
+    #     r=np.sqrt(x**2 + y**2 + z**2)
+    #     plt.plot(t,utils.relative_error(r_analytical,r),label=f"{n_steps} steps")
+    # plt.xlabel(r"Time [$\mu$s]")
+    # plt.ylabel("Relative error")
+    # plt.yscale("log")
+    # plt.legend()
+    # plt.savefig("../Fig/Euler_relative_error_.pdf")
+    # plt.close()
     
 
 
