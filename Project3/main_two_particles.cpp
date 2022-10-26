@@ -32,7 +32,7 @@ int main(int argc, char*argv[] )
     //If the user doesn't input the correct number of arguments, print an error message and exit
     if (argc != 5)
     {
-        std::cout << "Error: Incorrect number of arguments. Please input the method, number of timesteps, and total time." << std::endl;
+        std::cout << "Error: Incorrect number of arguments. Please input the method, number of timesteps, and total time. got:" << argc <<std::endl;
         return 1;
     }
     //define your positions and velocities 
