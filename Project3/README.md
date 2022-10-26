@@ -1,24 +1,24 @@
-#Project 3:
+# Project 3:
 
-##Compiling and running
+## Compiling and running
 
-###One particle:
+### One particle:
 
 ```
 make compile_one
 ```
-###Run:
+### Run:
 
 ```
 make run method=RK4/Euler n=number of time steps t=total simaluation time interaction=on/off
 ```
-###Two particles:
+### Two particles:
 
 ```
 make compile_two
 ```
 
-###Run:
+### Run:
 
 ```
 make run method=RK4/Euler n=number of time steps t=total simaluation time interaction=on/off
