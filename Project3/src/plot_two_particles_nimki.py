@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from Utils import *
 
-
+ 
 #RK4
-n_steps=32000
-n_particles=2
+n_steps=100000
+n_particles=10
 filename=f"RK4_{n_particles}_{n_steps}off.txt"
-#filename="RK4_2_50000.txt"
-utils=Utils(n_steps,50,2)
+filename="RK4_perturbation_10_100000_off0.600000_0.100000_.txt"
+utils=Utils(n_steps,500,10)
 t,x,y,z,vx,vy,vz=utils.get_data(filename)
 
 #Particle one positions
@@ -30,7 +30,7 @@ z_particle2=z[1,:]
 vx_particle2=vx[1,:]
 vy_particle2=vy[1,:]
 vz_particle2=vz[1,:]
-
+"""
 #Plot both particles in xy plane
 plt.plot(x_particle1,y_particle1,label="Particle 1")
 
@@ -66,18 +66,21 @@ plt.legend()
 plt.savefig("../Fig/RK4_2_particles_phase_z_off.pdf")
 plt.close()
 
-
+"""
 #make 3D plot of particles in (x,y,z) space
 ax = plt.figure().add_subplot(projection='3d')
+for i in range(n_particles):
+    ax.plot(x[i,:],y[i,:],z[i,:],label=f"Particle {i+1}")
 
-ax.plot(x_particle1, y_particle1, z_particle1, label='Particle 1')
-ax.plot(x_particle2, y_particle2, z_particle2, label='Particle 2')
+#ax.plot(x[i,:], y_particle1[i,:], z_particle1[i,:], label=f'{i}')
 
+
+""" 
 ax.scatter(x_particle2[0],y_particle2[0],z_particle2[0],c="g")
 ax.scatter(x_particle1[0],y_particle1[0],z_particle1[0],c="g",label="Initial position")
 ax.scatter(x_particle2[-1],y_particle2[-1],z_particle2[-1],c="r")
 ax.scatter(x_particle1[-1],y_particle1[-1],z_particle1[-1],c="r",label="End position")
-
+"""
 ax.set_xlabel(r"x [$\mu$m]")
 ax.set_ylabel(r"y [$\mu$m]")
 ax.set_zlabel(r"z [$\mu$m]")

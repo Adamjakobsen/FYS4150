@@ -185,11 +185,11 @@ void PenningTrap::evolve_RK4(double dt)
         particles.at(i).v = v + 1/6.*(k1_v.at(i) + 2.*k2_v.at(i) + 2.*k3_v.at(i) + k4_v.at(i) );
         particles.at(i).r = r + 1/6.*(k1_r.at(i) + 2.*k2_r.at(i) + 2.*k3_r.at(i) + k4_r.at(i) );
 
-        //if norm of r for particle i is smaller than d, set v to zero
+        //if norm of r for particle i is slarger than d, set v to zero
         if (arma::norm(particles.at(i).r) > d && particles.at(i).q!=0)
         {
             particles.at(i).v = arma::vec(std::vector<double> {0,0,0});
-            particles.at(i).q=0;
+            particles.at(i).q=0.0;
 
         }
         
@@ -266,11 +266,6 @@ arma::vec PenningTrap::total_force_external(int i)
     if (perturbation == true)
     {
     force_external = q*external_E_field_perturbed(r, time,omega,f) + q*arma::cross(v,external_B_field(r));
-    std::cout << "Perturbation is on" << std::endl;
-    std::cout << "The perturbed E-field is: " << external_E_field_perturbed(r, time,omega,f) << std::endl;
-    std::cout << "The unperturbed E-field is: " << external_E_field(r) << std::endl;
-    
-    std::cout << "At time: " << time << std::endl;
     
     }
     

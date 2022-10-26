@@ -89,6 +89,8 @@ class Utils():
             vz=np.zeros((self.n_particles,n))
             
             j_column=data[:,6]
+            freq_column=data[:,7]
+            amp_column=data[:,8]
             for i in range(self.n_particles):
 
                 index_p=np.where(j_column==i)
