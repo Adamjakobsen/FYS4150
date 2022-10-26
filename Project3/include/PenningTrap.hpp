@@ -14,6 +14,9 @@ class PenningTrap
         bool interaction;
         bool perturbation;
         std::vector<Particle> particles;
+        double omega;
+        double f;
+        double time;
 
         PenningTrap(double B0_in, double V0_in, double d_in);
 
@@ -45,13 +48,22 @@ class PenningTrap
         arma::vec total_force(int i);
 
         // Option to turn on/off the interaction between particles
-        void toggle_interaction(bool interaction);
+        void toggle_interaction(bool interaction_in);
 
         // External E_field with perturbation
-        arma::vec external_E_field_perturbed(arma::vec r, double t, double omega,double f);
+        arma::vec external_E_field_perturbed(arma::vec r, double t_in, double omega_in,double f_in);
 
         // Option to turn on/off the perturbation
-        void toggle_perturbation(bool perturbation);
+        void toggle_perturbation(bool perturbation_in);
+
+        // Method for setting the frequency of the perturbation
+        void set_frequency(double frequency_in);
+
+        // Method for setting the amplitude of the perturbation
+        void set_amplitude(double amplitude_in);
+
+        //Method for updating time
+        void update_time(double time_in);
 
 
 

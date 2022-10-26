@@ -10,7 +10,25 @@ PenningTrap::PenningTrap(double B0_in, double V0_in, double d_in)
 
     std::vector<Particle> particles_init; 
     particles = particles_init;
+    double omega;
+    double f;
+    double time;
 
+}
+//update time
+void PenningTrap::update_time(double time_in)
+{
+    PenningTrap::time = time_in;
+}
+// Set frequency
+void PenningTrap::set_frequency(double frequency_in)
+{
+    PenningTrap::omega = frequency_in;
+}
+
+void PenningTrap::set_amplitude(double f_in)
+{
+    PenningTrap::f = f_in;
 }
 
 //Add particle to the trap 
@@ -19,15 +37,15 @@ void PenningTrap::add_particle(Particle p_in)
     particles.push_back(p_in);
 }
 // Method for turning interaction on or off
-void PenningTrap::toggle_interaction(bool interaction)
+void PenningTrap::toggle_interaction(bool interaction_in)
 {
-    PenningTrap::interaction = interaction;
+    PenningTrap::interaction = interaction_in;
 
 }
 //Method for turning on perturbation
-void PenningTrap::toggle_perturbation(bool perturbation)
+void PenningTrap::toggle_perturbation(bool perturbation_in)
 {
-    PenningTrap::perturbation = perturbation;
+    PenningTrap::perturbation = perturbation_in;
 }
 // External electric field at point r=(x,y,z)
 
@@ -45,14 +63,14 @@ arma::vec PenningTrap::external_E_field(arma::vec r)
 }
 
 // External E-field with perturbation
-arma::vec PenningTrap::external_E_field_perturbed(arma::vec r, double t, double omega,double f)
+arma::vec PenningTrap::external_E_field_perturbed(arma::vec r, double t_in, double omega_in,double f_in)
 {
     double x = r(0);
     double y = r(1);
     double z = r(2);
 
     //define the potential given in the exercise
-    double prefactor_value = V0*(1. + f*cos(omega*t)); //not sure if we even need this definition if we already know what the prefactor value is
+    double prefactor_value = V0*(1. + f_in*cos(omega*t_in))/(d*d); //not sure if we even need this definition if we already know what the prefactor value is
     
     //derive with respect to all three components to find e-field 
     return arma::vec(std::vector<double> { prefactor_value * x, prefactor_value * y, -prefactor_value * 2. * z });
@@ -60,11 +78,14 @@ arma::vec PenningTrap::external_E_field_perturbed(arma::vec r, double t, double 
 // External magnetic field at point r=(x,y,z)
 
 arma::vec PenningTrap::external_B_field(arma::vec r)
-{
-
+{   
+    
 //include B-field here with z-direction, given by B-field strength
-    return arma::vec(std::vector<double> { 0, 0, B0});
+    
+        return arma::vec(std::vector<double> { 0, 0, B0});
+    
 }
+
 
 //Evolve the system one time step (dt) using Runge-Kutta 4th order
 
@@ -89,15 +110,15 @@ void PenningTrap::evolve_RK4(double dt)
     std::vector<arma::vec> k4_v(n_particles);
 
     
-    
+    //Using forward Euler to move all particles one time-step
+    //evolve_forward_Euler(dt); // *** I added this, this is similar to what i think we should do
+
     for (int i=0; i<particles.size(); i++)
     {   
         arma::vec v = particles.at(i).v;
         arma::vec F = total_force(i);
         
-        
-        
-        k1_v.at(i) = F/m*dt;
+        k1_v.at(i) = (F/m)*dt;
         k1_r.at(i) = v*dt;
         
     }
@@ -107,8 +128,8 @@ void PenningTrap::evolve_RK4(double dt)
         arma::vec v = particles_copy.at(i).v;
         arma::vec r = particles_copy.at(i).r;
 
-        particles.at(i).v = v + 0.5*k1_v.at(i)*dt;
-        particles.at(i).r = r + 0.5*k1_r.at(i)*dt;
+        particles.at(i).v = v + 0.5*k1_v.at(i);  //*** deleted dt
+        particles.at(i).r = r + 0.5*k1_r.at(i); //*** deleted dt
         
     }
 
@@ -125,9 +146,9 @@ void PenningTrap::evolve_RK4(double dt)
     for (int i=0; i<particles.size(); i++)
     {   
         arma::vec v = particles_copy.at(i).v;
-        arma::vec r = particles_copy.at(i).r;
-        particles.at(i).v = v + 0.5*k2_v.at(i)*dt;
-        particles.at(i).r = r + 0.5*k2_r.at(i)*dt;
+        arma::vec r = particles_copy.at(i).r; 
+        particles.at(i).v = v + 0.5*k2_v.at(i);  //*** deleted dt
+        particles.at(i).r = r + 0.5*k2_r.at(i); //*** deleted dt
         
     }
 
@@ -144,8 +165,8 @@ void PenningTrap::evolve_RK4(double dt)
     {   
         arma::vec v = particles_copy.at(i).v;
         arma::vec r = particles_copy.at(i).r;
-        particles.at(i).v = v + k3_v.at(i)*dt;
-        particles.at(i).r = r + k3_r.at(i)*dt;
+        particles.at(i).v = v + k3_v.at(i);  //*** deleted dt
+        particles.at(i).r = r + k3_r.at(i); //*** deleted dt
         
     }
 
@@ -154,7 +175,7 @@ void PenningTrap::evolve_RK4(double dt)
         arma::vec F = total_force(i);
         arma::vec v = particles.at(i).v;  
         k4_v.at(i) = dt * F/m;
-        k4_r.at(i) = dt * v;
+        k4_r.at(i) = dt * v; 
     }
     for (int i=0; i<particles.size(); i++)
     { 
@@ -164,11 +185,11 @@ void PenningTrap::evolve_RK4(double dt)
         particles.at(i).v = v + 1/6.*(k1_v.at(i) + 2.*k2_v.at(i) + 2.*k3_v.at(i) + k4_v.at(i) );
         particles.at(i).r = r + 1/6.*(k1_r.at(i) + 2.*k2_r.at(i) + 2.*k3_r.at(i) + k4_r.at(i) );
 
-        //if norm of r for particle i is smaller than d, set v to zero
-        if (arma::norm(particles.at(i).r) > d && particles.at(i).q!=0)
+        //if norm of r for particle i is slarger than d, set v to zero
+        if (norm(particles.at(i).r) > d && particles.at(i).q!=0)
         {
             particles.at(i).v = arma::vec(std::vector<double> {0,0,0});
-            particles.at(i).q=0;
+            particles.at(i).q=0.0;
 
         }
         
@@ -180,7 +201,9 @@ void PenningTrap::evolve_RK4(double dt)
 
 // Evolve the system one time step (dt) using Forward Euler
 void PenningTrap::evolve_forward_Euler(double dt)
-{   
+{
+    std::vector<Particle> particles_new = particles;
+
     for (int i = 0; i < particles.size(); i++)
     {
         double q=particles.at(i).q;
@@ -188,14 +211,22 @@ void PenningTrap::evolve_forward_Euler(double dt)
         
 
         arma::vec r = particles.at(i).r;
-        arma::vec v = particles.at(i) .v;
+        arma::vec v = particles.at(i).v;
         arma::vec F = total_force(i);
         arma::vec a = F/m;
 
 
         //Evolve using foward euler
-        particles.at(i).r=r+v*dt;
-        particles.at(i).v= v + a*dt;
+        particles_new.at(i).r=r+v*dt;
+        particles_new.at(i).v= v + a*dt;
+    }
+
+    // update all global particles *** updates how?
+    // ***  This is what Even added
+    for (int i=0; i < particles.size(); i++)
+    {
+    particles.at(i).r = particles_new.at(i).r;
+    particles.at(i).v = particles_new.at(i).v;
     }
 }
 
@@ -212,7 +243,7 @@ arma::vec PenningTrap::force_particle(int i, int j)
 
     //calculate the distance from particle_i to particle_j and find norm of the force
     arma::vec distance_ij = particles.at(i).r - particles.at(j).r;
-    double distance_ij_norm = arma::norm(distance_ij, 1);
+    double distance_ij_norm = norm(distance_ij);
 
     //calculate the force on particle_i from particle_j
     force_ij = (k_e*charges * distance_ij ) / (pow(distance_ij_norm,3));
@@ -231,9 +262,19 @@ arma::vec PenningTrap::total_force_external(int i)
     double m = particles.at(i).m;
     arma::vec r = particles.at(i).r;
     arma::vec v = particles.at(i).v;
-
-    //calculate the force on particle_i from the external fields
+    //If the perturbation is on we use the perturbed field
+    if (perturbation == true)
+    {
+    force_external = q*external_E_field_perturbed(r, time,omega,f) + q*arma::cross(v,external_B_field(r));
+    
+    }
+    
+    //If the perturbation is off we use the unperturbed field
+    else
+    
+    {
     force_external = q*external_E_field(r) + q*arma::cross(v,external_B_field(r) );
+    }
 
     return force_external;
 
