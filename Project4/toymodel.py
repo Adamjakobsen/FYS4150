@@ -8,18 +8,16 @@ def init_random_config(L):
     """
     L is the length of the square lattice
     """
-    configurations = np.zeros((L, L))
+    config = np.zeros((L, L))
     for i in range(L):
         for j in range(L):
-            configurations[i, j] = random.choice([+1, -1])
-    return configurations
+            config[i, j] = random.choice([+1, -1])
+    return config
 
 def find_interacting_pairs(index, raveled_config, L):
-    side_neibours = [(index - 1) % L + L*(index//L), (index + 1) % L+ L*(index//L)]
-    top_neibours = [(index - L)%(L*L), (index + L)%(L*L)]
-    neibours = side_neibours + top_neibours
-    #print('index', index,'neibours', neibours)
-    #print('len raveled config', len(raveled_config))
+    side_neighbours = [(index - 1) % L + L*(index//L), (index + 1) % L+ L*(index//L)]
+    vert_neighbours = [(index - L)%(L*L), (index + L)%(L*L)]
+    neibours = side_neighbours + vert_neighbours
     interacting_pairs = [(raveled_config[index], raveled_config[x]) for x in neibours]
     return interacting_pairs
 
@@ -42,12 +40,12 @@ def evolve(config, beta):
                 raveled_config[i] *= -1
     return raveled_config.reshape(L,L)
 
-def find_energy_given_array_of_configurations(configuration, L):
+def find_energy_given_array_of_config(config, L):
     """
     notice we are taking into account the periodic boundary conditions
     """
     energy = 0
-    raveled_config = configuration.ravel()
+    raveled_config = config.ravel()
     ## this is dumb now but will be useful later when we select only one term to flip
 
     for i in range(len(raveled_config)):
@@ -61,19 +59,19 @@ def find_energy_given_array_of_configurations(configuration, L):
 
 
 
-def plot_configurations(L, init=False, epochs=None):
+def plot_config(L, init=False, epochs=None):
     """
-    configurations is a 2d array of the L x L spins
+    config is a 2d array of the L x L spins
     """
     if init: # else we are evolving the system
-        configuration = init_random_config(L)
-        energy = find_energy_given_array_of_configurations(configuration, L)
-        plt.imshow(configuration, cmap = 'Purples', interpolation = 'nearest')
+        config = init_random_config(L)
+        energy = find_energy_given_array_of_config(config, L)
+        plt.imshow(config, cmap = 'Purples', interpolation = 'nearest')
         plt.title(f'Energy = {energy}')
 
         plt.show()
     else:
-        configuration = init_random_config(L)
+        config = init_random_config(L)
 
         kb = 1 ## only for testing
         T = 1
@@ -82,9 +80,9 @@ def plot_configurations(L, init=False, epochs=None):
         plt.figure()
         plt.show()
         for i in range(epochs):
-            configuration = evolve(configuration, beta)
-            energy = find_energy_given_array_of_configurations(configuration, L)
-            plt.imshow(configuration, cmap = 'Purples', interpolation = 'nearest')
+            config = evolve(config, beta)
+            energy = find_energy_given_array_of_config(config, L)
+            plt.imshow(config, cmap = 'Purples', interpolation = 'nearest')
             plt.title(f'Energy = {energy}')
             # animate the plot wit
             plt.draw()
@@ -94,4 +92,4 @@ def plot_configurations(L, init=False, epochs=None):
 if __name__ == '__main__':
     L = 100
     epochs = 100
-    plot_configurations(L, init=False, epochs=epochs)
+    plot_config(L, init=False, epochs=epochs)
