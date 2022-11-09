@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
     // main will only evolve the system and output the results to a file in matrix form
     // we will leave the find the total energy of config and other quantities of the system to python
     // here we just evolve and output the results
+    srand(time(NULL));
+
     int L = atoi(argv[1]);
     int mc_cycles = atoi(argv[2]); // 1 = L^2 runs, 2 = 2*L^2 runs, etc
     monte_carlo(L, mc_cycles);
