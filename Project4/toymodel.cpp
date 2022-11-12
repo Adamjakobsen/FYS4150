@@ -119,11 +119,11 @@ arma::mat evolve(arma::mat config, double beta, double &exp_E, double &exp_M)
                 exp_M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
             }
         }
-        std::cout << "delta_E = " << delta_E << std::endl;
-        // std::cout << "exp_E_inside = " << exp_E << std::endl;
-        //  std::cout << "raveled_config" << raveled_config << std::endl;
+        // std::cout << "delta_E = " << delta_E << std::endl;
+        //  std::cout << "exp_E_inside = " << exp_E << std::endl;
+        //   std::cout << "raveled_config" << raveled_config << std::endl;
     }
-    std::cout << "exp_E_outside = " << exp_E << std::endl;
+    // std::cout << "exp_E_outside = " << exp_E << std::endl;
 
     return arma::reshape(raveled_config, L, L);
 }
