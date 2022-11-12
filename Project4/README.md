@@ -1,22 +1,12 @@
-NEED TO UPDATE THIS BOI:
-
-One particle:
-
+Compile: 
 ```
-make compile_one
+make compile
 ```
 
-Two particles:
-
+Run example:
 ```
-make compile_two
-```
-
-Run:
-
-```
-make run method=RK4/Euler n=number of time steps t= total simaluation time interaction=on/off
+make run L=10 mc_cyles=10
 ```
 
-
+This is a test to push from Leahs mac.
 
