@@ -162,7 +162,7 @@ void monte_carlo(int L, int mc_cycles)
         // std::cout << "exp_E = " << exp_E << std::endl;
         // std::cout << "exp_M = " << exp_M << std::endl;
         file1 << config << std::endl;
-        file2 << exp_E / epochs << " " << exp_E2 / epochs << " " << exp_M / epochs << " " << exp_M2 / epochs << " " << exp_M_abs / epochs << " " << Cv << " " << chi << std::endl;
+        file2 << exp_E / epochs << " " << exp_E2 / (epochs * N) << " " << exp_M / epochs << " " << exp_M2 / (epochs * N) << " " << exp_M_abs / epochs << " " << Cv << " " << chi << std::endl;
     }
     file1.close();
     file2.close();
