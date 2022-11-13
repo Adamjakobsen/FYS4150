@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     monte_carlo(L, mc_cycles);
 }
 
-arma::mat init_random_config(int L, double &exp_E, double &exp_M)
+arma::mat init_random_config(int L, double &E, double &M)
 {
     int N = L * L;
     arma::mat config = arma::zeros<arma::mat>(L, L);
@@ -40,7 +40,7 @@ arma::mat init_random_config(int L, double &exp_E, double &exp_M)
     for (int i = 0; i < N; i++)
     {
         raveled_config(i) = 2 * (rand() % 2) - 1; // the %2 makes it be a number between 0 and 1, and the 2* makes it be a number between 0 and 2, and the -1 makes it be a number between -1 and 1
-        exp_M += raveled_config(i);
+        M += raveled_config(i);
     }
     // notice that to find the initial energy, we need another loop
     for (int i = 0; i < N; i++)
@@ -48,7 +48,7 @@ arma::mat init_random_config(int L, double &exp_E, double &exp_M)
         arma::mat interacting_pairs = find_interacting_pairs(i, raveled_config, L);
         for (int j = 0; j < 4; j++) // always has 4 neghbors so this is general
         {
-            exp_E += -(interacting_pairs(j, 0) * interacting_pairs(j, 1));
+            E += -(interacting_pairs(j, 0) * interacting_pairs(j, 1));
         }
     }
     return arma::reshape(raveled_config, L, L);
@@ -72,9 +72,6 @@ arma::mat find_interacting_pairs(int index, arma::vec raveled_config, int L)
     int index_value = raveled_config(index);
 
     interacting_pairs.col(0) = arma::vec(4).fill(index_value);
-    // std::cout << "index: " << index << std::endl;
-    // std::cout << "side_neighbours " << side_neighbours << std::endl;
-    // std::cout << "vert_neighbours " << vert_neighbours << std::endl;
     //  there must be a better way to do this
     interacting_pairs(0, 1) = raveled_config(side_neighbours(0));
     interacting_pairs(1, 1) = raveled_config(side_neighbours(1));
@@ -84,47 +81,41 @@ arma::mat find_interacting_pairs(int index, arma::vec raveled_config, int L)
     return interacting_pairs;
 }
 
-arma::mat evolve(arma::mat config, double beta, double &exp_E, double &exp_M)
+arma::mat evolve(arma::mat config, double beta, double &E, double &M)
 {
     int L = config.n_rows;
     arma::mat raveled_config = arma::reshape(config, L * L, 1);
     arma::mat interacting_pairs = arma::zeros<arma::mat>(4, 2);
     for (int iter = 0; iter < L * L; iter++)
     {
-        double energy = 0;
+        double neigbours_energy = 0; // energy of the neighbours of the randomly chosen spin that is why it has to be reset
         double delta_E = 0;
 
         int i = rand() % (L * L);
         interacting_pairs = find_interacting_pairs(i, raveled_config, L);
-        // std::cout << "interacting_pairs" << interacting_pairs << std::endl;
         for (int j = 0; j < 4; j++) // always has 4 neghbors so this is general
         {
-            energy += -(interacting_pairs(j, 0) * interacting_pairs(j, 1));
+            neigbours_energy += -(interacting_pairs(j, 0) * interacting_pairs(j, 1));
         }
 
-        delta_E = -2 * energy; // because because delta_E = E_new - E_old = -((-a)*b) - (-(a*b)) = 2*(a*b) = -2*energy
+        delta_E = -2 * neigbours_energy; // because because delta_E = E_new - E_old = -((-a)*b) - (-(a*b)) = 2*(a*b) = -2*neigbours_energy
         if (delta_E <= 0)
         {
             raveled_config(i) *= -1;
-            exp_E += delta_E;
-            exp_M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
+            E += delta_E;
+            M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
         }
         else
         {
             double p = exp(-beta * delta_E);
-            if ((rand() % 100) / 100 < p)
+            if ((rand() % 100) / 100. < p)
             {
                 raveled_config(i) *= -1;
-                exp_E += delta_E;
-                exp_M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
+                E += delta_E;
+                M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
             }
         }
-        // std::cout << "delta_E = " << delta_E << std::endl;
-        //  std::cout << "exp_E_inside = " << exp_E << std::endl;
-        //   std::cout << "raveled_config" << raveled_config << std::endl;
     }
-    // std::cout << "exp_E_outside = " << exp_E << std::endl;
-
     return arma::reshape(raveled_config, L, L);
 }
 
@@ -138,31 +129,78 @@ void monte_carlo(int L, int mc_cycles)
     file1.open(filename);
     file2.open(filename2);
 
-    // notice these will be normalized per spin in the output file
-    double exp_E = 0;
-    double exp_E2 = 0;
-    double exp_M = 0;
-    double exp_M2 = 0;
-    double exp_M_abs = 0;
+    // notice these will be normalized per spin WHEN OUTPUT TO THE FILE
+    double E = 0;
+    double M = 0;
+
+    double cumul_E = 0;
+    double cumul_M = 0;
+
+    double cumul_e = 0;
+    double cumul_m = 0;
+
+    double cumul_E2 = 0;
+    double avg_e = 0;
+    double avg_E = 0;
+    double avg_E2 = 0;
+
+    double avg_e2 = 0;
+    double var_E = 0;
+
+    double var_M = 0;
+    double avg_M = 0;
+    double avg_M2 = 0;
+
+    double avg_mabs = 0;
+
+    double cumul_M2 = 0;
+    double cumul_m2 = 0;
+    double cumul_e2 = 0;
+
+    double avg_m2 = 0;
+
+    double cumul_Mabs = 0;
+    double cumul_mabs = 0;
+
     double Cv = 0;
     double chi = 0;
-    arma::mat config = init_random_config(L, exp_E, exp_M);
+    arma::mat config = init_random_config(L, E, M);
 
     double N = L * L;
 
     int epochs = mc_cycles * N;
+    // std::cout << "epochs = " << epochs << std::endl;
     for (int i = 0; i < epochs; i++)
     {
-        config = evolve(config, beta, exp_E, exp_M);
-        exp_E2 += exp_E * exp_E;
-        exp_M2 += exp_M * exp_M;
-        exp_M_abs += abs(exp_M);
-        Cv = (exp_E2 - exp_E * exp_E) / (N * kb * T * T);
-        chi = (exp_M2 - exp_M_abs * exp_M_abs) / (N * kb * T);
-        // std::cout << "exp_E = " << exp_E << std::endl;
-        // std::cout << "exp_M = " << exp_M << std::endl;
+        config = evolve(config, beta, E, M);
+        // the following qtd will be calculated in a dumb way just to be didatic but uses lots of flops
+        cumul_E += E;
+        cumul_e = cumul_E / N;
+        cumul_E2 += E * E;
+        cumul_e2 = cumul_E2 / (N * N);
+        avg_e = cumul_e / (i + 1);
+        avg_e2 = cumul_e2 / (i + 1);
+        avg_E2 = cumul_E2 / (i + 1);
+        avg_E = cumul_E / (i + 1);
+        var_E = avg_E2 - avg_E * avg_E;
+
+        cumul_M += M;
+        cumul_m = cumul_M / N;
+        cumul_M2 += M * M;
+        cumul_m2 = cumul_M2 / (N * N);
+        cumul_Mabs += std::abs(M);
+        cumul_mabs = cumul_Mabs / N;
+        avg_mabs = cumul_mabs / (i + 1);
+        avg_m2 = cumul_m2 / (i + 1);
+        avg_M = cumul_M / (i + 1);
+        avg_M2 = cumul_M2 / (i + 1);
+        var_M = avg_M2 - avg_M * avg_M;
+
+        Cv = (var_E) / (N * kb * T * T);
+        chi = (var_M) / (N * kb * T);
+
         file1 << config << std::endl;
-        file2 << exp_E / epochs << " " << exp_E2 / (epochs * N) << " " << exp_M / epochs << " " << exp_M2 / (epochs * N) << " " << exp_M_abs / epochs << " " << Cv << " " << chi << std::endl;
+        file2 << avg_e << " " << avg_mabs << " " << Cv << " " << chi << std::endl;
     }
     file1.close();
     file2.close();
