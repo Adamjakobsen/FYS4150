@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+
 #include <armadillo>
 #include <vector>
 #include <stdlib.h> /* srand, rand */
@@ -129,7 +130,7 @@ void monte_carlo(int L, int mc_cycles)
     file1.open(filename);
     file2.open(filename2);
 
-    // notice these will be normalized per spin WHEN OUTPUT TO THE FILE
+    // avg will always be wrt to the number of mc cycles
     double E = 0;
     double M = 0;
 
@@ -167,40 +168,50 @@ void monte_carlo(int L, int mc_cycles)
     arma::mat config = init_random_config(L, E, M);
 
     double N = L * L;
+    int time_steps = mc_cycles * N;
+    int burn_in = int(0 * mc_cycles);
+    std::cout << "burn in: " << burn_in << std::endl;
 
-    int epochs = mc_cycles * N;
-    // std::cout << "epochs = " << epochs << std::endl;
-    for (int i = 0; i < epochs; i++)
+    // std::cout << "time_steps = " << time_steps << std::endl;
+    for (int i = 0; i < time_steps; i++)
     {
         config = evolve(config, beta, E, M);
         // the following qtd will be calculated in a dumb way just to be didatic but uses lots of flops
-        cumul_E += E;
-        cumul_e = cumul_E / N;
-        cumul_E2 += E * E;
-        cumul_e2 = cumul_E2 / (N * N);
-        avg_e = cumul_e / (i + 1);
-        avg_e2 = cumul_e2 / (i + 1);
-        avg_E2 = cumul_E2 / (i + 1);
-        avg_E = cumul_E / (i + 1);
-        var_E = avg_E2 - avg_E * avg_E;
+        if (i >= burn_in)
+        {
+            // std::cout << "i = " << i << std::endl;
+            cumul_E += E;
+            cumul_e = cumul_E / N;
+            cumul_E2 += E * E;
+            cumul_e2 = cumul_E2 / (N * N);
+            avg_e = cumul_e / (i + 1 - burn_in);
+            avg_e2 = cumul_e2 / (i + 1 - burn_in);
+            avg_E2 = cumul_E2 / (i + 1 - burn_in);
+            avg_E = cumul_E / (i + 1 - burn_in);
+            var_E = avg_E2 - avg_E * avg_E;
 
-        cumul_M += M;
-        cumul_m = cumul_M / N;
-        cumul_M2 += M * M;
-        cumul_m2 = cumul_M2 / (N * N);
-        cumul_Mabs += std::abs(M);
-        cumul_mabs = cumul_Mabs / N;
-        avg_mabs = cumul_mabs / (i + 1);
-        avg_m2 = cumul_m2 / (i + 1);
-        avg_M = cumul_M / (i + 1);
-        avg_M2 = cumul_M2 / (i + 1);
-        var_M = avg_M2 - avg_M * avg_M;
+            cumul_M += M;
+            cumul_m = cumul_M / N;
+            cumul_M2 += M * M;
+            cumul_m2 = cumul_M2 / (N * N);
+            cumul_Mabs += std::abs(M);
+            cumul_mabs = cumul_Mabs / N;
+            avg_mabs = cumul_mabs / (i + 1 - burn_in);
+            avg_m2 = cumul_m2 / (i + 1 - burn_in);
+            avg_M = cumul_M / (i + 1 - burn_in);
+            avg_M2 = cumul_M2 / (i + 1 - burn_in);
+            var_M = avg_M2 - avg_M * avg_M;
 
-        Cv = (var_E) / (N * kb * T * T);
-        chi = (var_M) / (N * kb * T);
-
-        file1 << config << std::endl;
-        file2 << avg_e << " " << avg_mabs << " " << Cv << " " << chi << std::endl;
+            Cv = (var_E) / (N * kb * T * T);
+            chi = (var_M) / (N * kb * T);
+            if (i % int(N) == 0 && i != 0) // output only at the end of a mc_cycle
+            {
+                file1 << config << std::endl;
+                file2 << std::setw(25) << std::setprecision(15)
+                      << avg_e << " " << avg_mabs << " " << Cv << " " << chi
+                      << std::endl;
+            }
+        }
     }
     file1.close();
     file2.close();
