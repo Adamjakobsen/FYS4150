@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include <random> // for std::mt19937
 
 #include <armadillo>
 #include <vector>
@@ -11,12 +12,16 @@
 arma::mat init_random_config(int L, double &exp_E, double &exp_M);
 arma::mat find_interacting_pairs(int index, arma::vec raveled_config, int L);
 arma::mat evolve(arma::mat config, double beta, double &exp_E, double &exp_M);
-void monte_carlo(int L, int mc_cycles);
+int mt_random_int(int low, int high);
+double mt_random_float(int low, int high);
 
+void monte_carlo(int L, int mc_cycles);
+std::random_device rd;
+std::mt19937 gen(rd());
 // define your physical system's variables here:
 
 double kb = 1.;
-double T = 1.;
+double T = 1;
 double beta = 1. / (kb * T);
 
 int main(int argc, char *argv[])
@@ -24,9 +29,11 @@ int main(int argc, char *argv[])
     // main will only evolve the system and output the results to a file in matrix form
     // we will leave the find the total energy of config and other quantities of the system to python
     // here we just evolve and output the results
-    srand(time(NULL));
+    // srand(time(NULL));
+
     // srand(1);
     int L = atoi(argv[1]);
+
     int mc_cycles = atoi(argv[2]); // 1 = L^2 runs, 2 = 2*L^2 runs, etc
     monte_carlo(L, mc_cycles);
 }
@@ -40,7 +47,7 @@ arma::mat init_random_config(int L, double &E, double &M)
 
     for (int i = 0; i < N; i++)
     {
-        raveled_config(i) = 2 * (rand() % 2) - 1; // the %2 makes it be a number between 0 and 1, and the 2* makes it be a number between 0 and 2, and the -1 makes it be a number between -1 and 1
+        raveled_config(i) = 2 * mt_random_int(0, 1) - 1; // makes -1 or 1 with equal probability
         M += raveled_config(i);
     }
     // notice that to find the initial energy, we need another loop
@@ -92,7 +99,8 @@ arma::mat evolve(arma::mat config, double beta, double &E, double &M)
         double neigbours_energy = 0; // energy of the neighbours of the randomly chosen spin that is why it has to be reset
         double delta_E = 0;
 
-        int i = rand() % (L * L);
+        int i = mt_random_int(0, L * L - 1); // choose a random spin index to flip
+        // std::cout << i << std::endl;
         interacting_pairs = find_interacting_pairs(i, raveled_config, L);
         for (int j = 0; j < 4; j++) // always has 4 neghbors so this is general
         {
@@ -100,21 +108,13 @@ arma::mat evolve(arma::mat config, double beta, double &E, double &M)
         }
 
         delta_E = -2 * neigbours_energy; // because because delta_E = E_new - E_old = -((-a)*b) - (-(a*b)) = 2*(a*b) = -2*neigbours_energy
-        if (delta_E <= 0)
+
+        double p = exp(-beta * delta_E);
+        if (mt_random_float(0, 1) < p)
         {
             raveled_config(i) *= -1;
             E += delta_E;
             M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
-        }
-        else
-        {
-            double p = exp(-beta * delta_E);
-            if ((rand() % 100) / 100. < p)
-            {
-                raveled_config(i) *= -1;
-                E += delta_E;
-                M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
-            }
         }
     }
     return arma::reshape(raveled_config, L, L);
@@ -215,4 +215,16 @@ void monte_carlo(int L, int mc_cycles)
     }
     file1.close();
     file2.close();
+}
+
+int mt_random_int(int low, int high)
+{
+    std::uniform_int_distribution<> dist(low, high);
+    return dist(gen);
+}
+
+double mt_random_float(int low, int high)
+{
+    std::uniform_real_distribution<double> dist2(low, high);
+    return dist2(gen);
 }
