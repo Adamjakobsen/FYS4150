@@ -16,12 +16,12 @@ int mt_random_int(int low, int high);
 double mt_random_float(int low, int high);
 
 void monte_carlo(int L, int mc_cycles);
-std::random_device rd;
-std::mt19937 gen(rd());
+// std::random_device rd;
+std::mt19937 gen(123);
 // define your physical system's variables here:
 
 double kb = 1.;
-double T = 1;
+double T = 2.4;
 double beta = 1. / (kb * T);
 
 int main(int argc, char *argv[])
@@ -29,9 +29,7 @@ int main(int argc, char *argv[])
     // main will only evolve the system and output the results to a file in matrix form
     // we will leave the find the total energy of config and other quantities of the system to python
     // here we just evolve and output the results
-    // srand(time(NULL));
 
-    // srand(1);
     int L = atoi(argv[1]);
 
     int mc_cycles = atoi(argv[2]); // 1 = L^2 runs, 2 = 2*L^2 runs, etc
@@ -157,10 +155,13 @@ void monte_carlo(int L, int mc_cycles)
     double cumul_M2 = 0;
     double cumul_m2 = 0;
     double cumul_e2 = 0;
+    double avg_Mabs = 0;
 
     double avg_m2 = 0;
 
+    double avg_Mabs2 = 0;
     double cumul_Mabs = 0;
+
     double cumul_mabs = 0;
 
     double Cv = 0;
@@ -195,13 +196,18 @@ void monte_carlo(int L, int mc_cycles)
             cumul_M2 += M * M;
             cumul_m2 = cumul_M2 / (N * N);
             cumul_Mabs += std::abs(M);
+            avg_Mabs = cumul_Mabs / (i + 1 - burn_in);
+
             cumul_mabs = cumul_Mabs / N;
             avg_mabs = cumul_mabs / (i + 1 - burn_in);
             avg_m2 = cumul_m2 / (i + 1 - burn_in);
             avg_M = cumul_M / (i + 1 - burn_in);
             avg_M2 = cumul_M2 / (i + 1 - burn_in);
-            var_M = avg_M2 - avg_M * avg_M;
+            avg_Mabs2 = avg_Mabs * avg_Mabs;
 
+            // var_M = avg_M2 - avg_M * avg_M; was this and is prolly wrong
+
+            var_M = avg_M2 - avg_Mabs2;
             Cv = (var_E) / (N * kb * T * T);
             chi = (var_M) / (N * kb * T);
             if (i % int(N) == 0 && i != 0) // output only at the end of a mc_cycle
