@@ -13,8 +13,11 @@ Compile:
 ```
 make compile
 ```
-OBS: make sure you have openmp installed
-
+OBS: make sure you have openmp installed! For clang compilers this might require you to run 
+```
+ - brew install llvm libomp
+ - export CPP=/usr/local/opt/llvm/bin/clang;
+```
 
 Run example:
 ```
