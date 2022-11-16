@@ -13,7 +13,7 @@ Compile:
 ```
 make compile
 ```
-OBS: make sure you have \emph{openmp} installed
+OBS: make sure you have openmp installed
 
 
 Run example:
