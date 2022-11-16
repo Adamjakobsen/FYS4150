@@ -16,5 +16,14 @@ make compile
 
 Run example:
 ```
-make run L=10 mc_cyles=10
+make run L=2 mc_cycles=100000 burn_pct=10 lower_temp=1 upper_temp=2 temp_step=0.5 align=0
 ```
+- Parameters 
+  - \textbf{L:} size of the grid of a total of N = LXL electrons
+  - \textbf{mc_cycles:} number of N atemped randomly selected spin flips
+  - \textbf{burn_pct:} percentage of mc_cycles to burn
+  - \textbf{lower_temp:} temperature to begin the loop of temperatures (each temperature is saved in a different file)
+  - \textbf{upper_temp:} temperature to stop the loop of temperatures
+  - \textbf{temp_step:} step to make beging from lower_temp, inclusive
+  - \textbf{align:} 0 is initialize spin configuration randomly, 1 is initialize all up, 2 is initialize all down.
+
