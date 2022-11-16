@@ -4,10 +4,11 @@
 #include <fstream>
 #include <iomanip>
 #include <random> // for std::mt19937
-
+#include <omp.h>
 #include <armadillo>
 #include <vector>
-#include <stdlib.h> /* srand, rand */
+#include <algorithm> // for openmp ?
+#include <stdlib.h>  /* srand, rand */
 
 arma::mat init_random_config(int L, double &exp_E, double &exp_M, int align);
 arma::mat find_interacting_pairs(int index, arma::vec raveled_config, int L);
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
     double temp_step = atof(argv[6]);
     int align = atoi(argv[7]); // 0 = random, 1 = aligned up (1), 2 = aligned down (-1)
 
+#pragma omp parallel for
     for (double T = lower_temp; T <= upper_temp; T += temp_step)
     {
         monte_carlo(L, mc_cycles, burn_pct, T, align);
