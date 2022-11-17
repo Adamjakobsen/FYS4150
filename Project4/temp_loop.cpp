@@ -19,6 +19,8 @@ double mt_random_float(int low, int high);
 void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align);
 std::random_device rd;
 std::mt19937 gen(rd()); // gen(2) for a seed of 2
+arma::vec L_vec = arma::vec(std::vector<double>{40, 60, 80, 100});
+
 // define your physical system's variables here:
 
 double kb = 1.;
@@ -28,28 +30,31 @@ int main(int argc, char *argv[])
     // we will leave the find the total energy of config and other quantities of the system to python
     // here we just evolve and output the results
 
-    int L = atoi(argv[1]);
-
-    int mc_cycles = atoi(argv[2]); // 1 = L^2 runs, 2 = 2*L^2 runs, etc
-    int burn_pct = atoi(argv[3]);  // 10 = 10% burn in, 20 = 20% burn in, etc
-    double lower_temp = atof(argv[4]);
-    double upper_temp = atof(argv[5]);
-    double temp_step = atof(argv[6]);
-    int align = atoi(argv[7]); // 0 = random, 1 = aligned up (1), 2 = aligned down (-1)
+    int mc_cycles = atoi(argv[1]); // 1 = L^2 runs, 2 = 2*L^2 runs, etc
+    int burn_pct = atoi(argv[2]);  // 10 = 10% burn in, 20 = 20% burn in, etc
+    double lower_temp = atof(argv[3]);
+    double upper_temp = atof(argv[4]);
+    double temp_step = atof(argv[5]);
+    int align = atoi(argv[6]); // 0 = random, 1 = aligned up (1), 2 = aligned down (-1)
     double original_temp_step = temp_step;
 
 #pragma omp parallel for
-    for (double T = lower_temp; T <= upper_temp; T += temp_step)
+    for (int i = 0; i < 4; i++)
     {
-        if (T > 2.2 && T <= 2.4)
+        double L = L_vec(i);
+        std::cout << "L = " << L << std::endl;
+        for (double T = lower_temp; T <= upper_temp; T += temp_step)
         {
-            temp_step = 0.1 * original_temp_step;
+            if (T > 2.2 && T <= 2.4)
+            {
+                temp_step = 0.2 * original_temp_step;
+            }
+            if (T > 2.4)
+            {
+                temp_step = original_temp_step;
+            }
+            monte_carlo(L, mc_cycles, burn_pct, T, align);
         }
-        if (T > 2.4)
-        {
-            temp_step = original_temp_step;
-        }
-        monte_carlo(L, mc_cycles, burn_pct, T, align);
     }
 }
 
@@ -172,14 +177,17 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align)
         // std::cout << "delta_e_vec(i)" << delta_e_vec(i) << std::endl;
     }
 
+    std::ofstream file1;
     std::ofstream file2;
 
     std::string rounded_T = std::to_string(T).substr(0, std::to_string(T).find(".") + 3 + 1);
 
     std::cout
         << "T: " << T << std::endl;
-    std::string filename2 = "problem6/" + std::to_string(L) + "/epsilon_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".txt";
+    std::string filename = std::to_string(L) + "/cfg_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".txt";
+    std::string filename2 = std::to_string(L) + "/qt_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".txt";
 
+    file1.open(filename);
     file2.open(filename2);
 
     // avg will always be wrt to the number of mc cycles
@@ -227,31 +235,55 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align)
     int burn_in = int((burn_pct / 100.) * time_steps);
     // std::cout << "burned mc_cycles: " << burn_in << std::endl;
 
-    arma::vec E_vec = arma::zeros<arma::vec>(mc_cycles);
     // std::cout << "time_steps = " << time_steps << std::endl;
     for (int i = 0; i < time_steps; i++)
     {
         config = evolve(config, beta, E, M, p_vec);
         // the following qtd will be calculated in a dumb way just to be didatic but uses lots of flops
 
-        E_vec(i / N) = E;
-        // cumul_E += E;
-        //  std::cout << "E = " << E << std::endl;
-        //  if (i > burn_in)
-        //{
-        //     if (i % int(N) == 0 && i != 0)
-        //     {
-        //         file2 << std::setw(25) << std::setprecision(15)
-        //               << E / N << std::endl;
-        //     }
-        // }
+        cumul_E += E;
+        // std::cout << "E = " << E << std::endl;
+
+        cumul_e = cumul_E / N;
+        cumul_E2 += E * E;
+        cumul_e2 = cumul_E2 / (N * N);
+        avg_e = cumul_e / (i + 1);
+        avg_e2 = cumul_e2 / (i + 1);
+        avg_E2 = cumul_E2 / (i + 1);
+        avg_E = cumul_E / (i + 1);
+        var_E = avg_E2 - avg_E * avg_E;
+
+        cumul_M += M;
+        cumul_m = cumul_M / N;
+        cumul_M2 += M * M;
+        cumul_m2 = cumul_M2 / (N * N);
+        cumul_Mabs += std::abs(M);
+        avg_Mabs = cumul_Mabs / (i + 1);
+
+        cumul_mabs = cumul_Mabs / N;
+
+        avg_mabs = cumul_mabs / (i + 1);
+        avg_m2 = cumul_m2 / (i + 1);
+        avg_M = cumul_M / (i + 1);
+        avg_M2 = cumul_M2 / (i + 1);
+        avg_Mabs2 = avg_Mabs * avg_Mabs;
+
+        var_M = avg_M2 - avg_Mabs2;
+        Cv = (var_E) / (N * kb * T * T);
+        chi = (var_M) / (N * kb * T);
+        if (i > burn_in)
+        {
+            if (i % int(N) == 0 && i != 0) // output only at the end of a mc_cycle
+            {
+                file1
+                    << config << std::endl;
+                file2 << std::setw(25) << std::setprecision(15)
+                      << avg_e << " " << avg_mabs << " " << Cv << " " << chi
+                      << std::endl;
+            }
+        }
     }
-    // output evev to file for problem 6
-    for (int i = 0; i < mc_cycles; i++)
-    {
-        file2 << std::setw(25) << std::setprecision(15)
-              << E_vec(i) / N << std::endl;
-    }
+    file1.close();
     file2.close();
 }
 

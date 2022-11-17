@@ -1,5 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt
+import scipy.stats as stats
+
 
 #20x20 lattice 
 #plotting average energy per spin as a function of MC cycles for two temperatures: T = 1 and T = 2.4
@@ -21,6 +23,8 @@ E_N24 = data_t24[:,0] #average energy per spin
 M_N24 = data_t24[:,1] #average magnetisation per spin 
 C_v24 = data_t24[:,2] #specific heat capacity
 chi24 = data_t24[:,3] #susceptibility
+
+#
 
 #creating normalised histograms of generated epsilon samples for T = 1 and T = 2.4
 #have burn in of 10% of total MC cycles
