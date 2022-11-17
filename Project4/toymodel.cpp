@@ -237,7 +237,7 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align)
         // the following qtd will be calculated in a dumb way just to be didatic but uses lots of flops
 
         cumul_E += E;
-        std::cout << "E = " << E << std::endl;
+        // std::cout << "E = " << E << std::endl;
 
         cumul_e = cumul_E / N;
         cumul_E2 += E * E;
