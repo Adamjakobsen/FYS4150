@@ -11,7 +11,6 @@
 #include <stdlib.h>  /* srand, rand */
 
 arma::mat init_random_config(int L, double &exp_E, double &exp_M, int align);
-arma::mat find_interacting_pairs(int index, arma::vec raveled_config, int L);
 arma::mat evolve(arma::mat config, double beta, double &exp_E, double &exp_M, arma::vec p_vec);
 int mt_random_int(int low, int high);
 double mt_random_float(int low, int high);
@@ -57,72 +56,61 @@ arma::mat init_random_config(int L, double &E, double &M, int align)
 {
     int N = L * L;
     arma::mat config = arma::zeros<arma::mat>(L, L);
-    arma::mat raveled_config = arma::reshape(config, N, 1);
-    arma::mat interacting_pairs = arma::zeros<arma::mat>(4, 2);
+    arma::mat interacting_pairs; //= arma::zeros<arma::mat>(4, 2);
 
     for (int i = 0; i < N; i++)
     {
+        int k = i / L;
+        int l = i % L;
         if (align == 0)
         {
-            raveled_config(i) = mt_random_int(0, 1) * 2 - 1; // makes -1 or 1 with equal probability
+            config(k, l) = mt_random_int(0, 1) * 2 - 1; // makes -1 or 1 with equal probability
         }
         else if (align == 1)
         {
-            raveled_config(i) = 1;
+            config(k, l) = 1;
         }
         else if (align == 2)
         {
-            raveled_config(i) = -1;
+            config(k, l) = -1;
         }
-
-        M += raveled_config(i);
+        M += config(k, l);
     }
     // notice that to find the initial energy, we need another loop
     for (int i = 0; i < N; i++)
     {
-        arma::mat interacting_pairs = find_interacting_pairs(i, raveled_config, L);
-        for (int j = 0; j < 4; j++) // always has 4 neghbors so this is general
-        {
-            E += -(interacting_pairs(j, 0) * interacting_pairs(j, 1));
-        }
+        int k = i / L;
+        int l = i % L;
+
+        E += -config(k, l) * (config((k + 1) % L, l) + config((k - 1 + L) % L, l) + config(k, (l + 1) % L) + config(k, (l - 1 + L) % L));
     }
     E = E / 2; // since we double count each interaction
 
     // std::cout << "Initial energy: " << E << std::endl;
-    return arma::reshape(raveled_config, L, L);
+    return config;
 }
 
-arma::mat find_interacting_pairs(int index, arma::vec raveled_config, int L)
-{
-    // create a vector of vectors to store the interacting pairs
-
-    arma::mat interacting_pairs = arma::zeros<arma::mat>(4, 2); // rows are the interacting pairs, columns are the coordinates of the interacting pairs
-    arma::mat side_neighbours = arma::zeros<arma::vec>(2);
-    arma::mat vert_neighbours = arma::zeros<arma::vec>(2);
-
-    // notice the intentional use of integer division
-    side_neighbours(0) = (L + index - 1) % L + L * (index / L); // same as index-1, but if index is 0, it will wrap around to the end of the row
-    side_neighbours(1) = (L + index + 1) % L + L * (index / L); // same as index+1, but if index is L-1, it will wrap around to the start of the row
-
-    vert_neighbours(0) = (L * L + index - L) % (L * L); // same as index-L, but if index is 0, it will wrap around to the end of the column
-    vert_neighbours(1) = (L * L + index + L) % (L * L); // same as index+L, but if index is L*L-1, it will wrap around to the start of the column
-
-    int index_value = raveled_config(index);
-
-    interacting_pairs.col(0) = arma::vec(4).fill(index_value);
-    //  there must be a better way to do this
-    interacting_pairs(0, 1) = raveled_config(side_neighbours(0));
-    interacting_pairs(1, 1) = raveled_config(side_neighbours(1));
-    interacting_pairs(2, 1) = raveled_config(vert_neighbours(0));
-    interacting_pairs(3, 1) = raveled_config(vert_neighbours(1));
-
-    return interacting_pairs;
-}
+// arma::mat find_interacting_pairs(int k, int l, arma::mat config, int L)
+//{
+//     // create a vector of vectors to store the interacting pairs
+//     arma::mat interacting_pairs = arma::zeros<arma::mat>(4, 2); // rows are the interacting pairs, columns are the coordinates of the interacting pairs
+//
+//     // notice the intentional use of integer division
+//
+//     int index_value = config(k, l);
+//     interacting_pairs.col(0) = arma::vec(4).fill(index_value);
+//     //  there must be a better way to do this
+//     interacting_pairs(0, 1) = config(k, (l + 1) % L);
+//     interacting_pairs(1, 1) = config(k, (l - 1 + L) % L);
+//     interacting_pairs(2, 1) = config((k + 1) % L, l);
+//     interacting_pairs(3, 1) = config((k - 1 + L) % L, l);
+//
+//     return interacting_pairs;
+// }
 
 arma::mat evolve(arma::mat config, double beta, double &E, double &M, arma::vec p_vec)
 {
     int L = config.n_rows;
-    arma::mat raveled_config = arma::reshape(config, L * L, 1);
     arma::mat interacting_pairs = arma::zeros<arma::mat>(4, 2);
     for (int iter = 0; iter < L * L; iter++)
     {
@@ -130,35 +118,34 @@ arma::mat evolve(arma::mat config, double beta, double &E, double &M, arma::vec 
         double delta_E = 0;
 
         int i = mt_random_int(0, L * L - 1); // choose a random spin index to flip
-        // std::cout << i << std::endl;
-        interacting_pairs = find_interacting_pairs(i, raveled_config, L);
-        for (int j = 0; j < 4; j++) // always has 4 neghbors so this is general
-        {
-            neigbours_energy += -(interacting_pairs(j, 0) * interacting_pairs(j, 1));
-        }
+
+        // figure out k and l from i
+        int k = i / L;
+        int l = i % L;
+
+        neigbours_energy += -config(k, l) * (config((k + 1) % L, l) + config((k - 1 + L) % L, l) + config(k, (l + 1) % L) + config(k, (l - 1 + L) % L));
 
         delta_E = -2 * neigbours_energy; // because because delta_E = E_new - E_old = -((-a)*b) - (-(a*b)) = 2*(a*b) = -2*neigbours_energy
 
         if (delta_E <= 0)
         {
-            raveled_config(i) *= -1;
+            config(k, l) *= -1;
             E += delta_E;
-            M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
+            M += 2 * config(k, l); // factor of 2 because we are only changing one spin
         }
         else
         {
-            double p = std::exp(-beta * delta_E);
-            // double p = p_vec[(delta_E + 8) / 4]; // this did not make it faster
+            double p = p_vec[(delta_E + 8) / 4]; // this did not make it faster
 
             if (mt_random_float(0, 1) < p)
             {
-                raveled_config(i) *= -1;
+                config(k, l) *= -1;
                 E += delta_E;
-                M += 2 * raveled_config(i); // factor of 2 because we are only changing one spin
+                M += 2 * config(k, l); // factor of 2 because we are only changing one spin
             }
         }
     }
-    return arma::reshape(raveled_config, L, L);
+    return config;
 }
 
 void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align)
@@ -169,52 +156,39 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align)
     for (int i = 0; i < 5; i++)
     {
         p_vec(i) = std::exp(-beta * delta_e_vec(i));
-        // std::cout << "delta_e_vec(i)" << delta_e_vec(i) << std::endl;
     }
 
-    std::ofstream file1;
     std::ofstream file2;
 
     std::string rounded_T = std::to_string(T).substr(0, std::to_string(T).find(".") + 3 + 1);
 
     std::cout
         << "T: " << T << std::endl;
-    std::string filename = std::to_string(L) + "/cfg_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".txt";
-    std::string filename2 = std::to_string(L) + "/qt_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".txt";
+    // std::string filename = std::to_string(L) + "/cfg_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".csv";
+    std::string filename2 = std::to_string(L) + "/qt_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".csv";
 
-    file1.open(filename);
-    file2.open(filename2);
+    // file1.open(filename);
 
     // avg will always be wrt to the number of mc cycles
     double E = 0;
     double M = 0;
 
     double cumul_E = 0;
-    double cumul_M = 0;
-
-    double cumul_e = 0;
-    double cumul_m = 0;
 
     double cumul_E2 = 0;
     double avg_e = 0;
     double avg_E = 0;
     double avg_E2 = 0;
 
-    double avg_e2 = 0;
     double var_E = 0;
 
     double var_M = 0;
-    double avg_M = 0;
     double avg_M2 = 0;
 
     double avg_mabs = 0;
 
     double cumul_M2 = 0;
-    double cumul_m2 = 0;
-    double cumul_e2 = 0;
     double avg_Mabs = 0;
-
-    double avg_m2 = 0;
 
     double avg_Mabs2 = 0;
     double cumul_Mabs = 0;
@@ -228,6 +202,9 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align)
     double N = L * L;
     int time_steps = mc_cycles * N;
     int burn_in = int((burn_pct / 100.) * time_steps);
+    int mc_counter = 0;
+
+    arma::mat output_data = arma::zeros<arma::mat>(mc_cycles - 1, 4);
     // std::cout << "burned mc_cycles: " << burn_in << std::endl;
 
     // std::cout << "time_steps = " << time_steps << std::endl;
@@ -237,48 +214,56 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align)
         // the following qtd will be calculated in a dumb way just to be didatic but uses lots of flops
 
         cumul_E += E;
+        cumul_E2 += E * E;
+        cumul_Mabs += std::abs(M);
+        cumul_M2 += M * M;
         // std::cout << "E = " << E << std::endl;
 
-        cumul_e = cumul_E / N;
-        cumul_E2 += E * E;
-        cumul_e2 = cumul_E2 / (N * N);
-        avg_e = cumul_e / (i + 1);
-        avg_e2 = cumul_e2 / (i + 1);
-        avg_E2 = cumul_E2 / (i + 1);
-        avg_E = cumul_E / (i + 1);
-        var_E = avg_E2 - avg_E * avg_E;
-
-        cumul_M += M;
-        cumul_m = cumul_M / N;
-        cumul_M2 += M * M;
-        cumul_m2 = cumul_M2 / (N * N);
-        cumul_Mabs += std::abs(M);
-        avg_Mabs = cumul_Mabs / (i + 1);
-
-        cumul_mabs = cumul_Mabs / N;
-
-        avg_mabs = cumul_mabs / (i + 1);
-        avg_m2 = cumul_m2 / (i + 1);
-        avg_M = cumul_M / (i + 1);
-        avg_M2 = cumul_M2 / (i + 1);
-        avg_Mabs2 = avg_Mabs * avg_Mabs;
-
-        var_M = avg_M2 - avg_Mabs2;
-        Cv = (var_E) / (N * kb * T * T);
-        chi = (var_M) / (N * kb * T);
         if (i > burn_in)
         {
             if (i % int(N) == 0 && i != 0) // output only at the end of a mc_cycle
             {
-                file1
-                    << config << std::endl;
-                file2 << std::setw(25) << std::setprecision(15)
-                      << avg_e << " " << avg_mabs << " " << Cv << " " << chi
-                      << std::endl;
+                avg_E2 = cumul_E2 / (i + 1);
+                avg_E = cumul_E / (i + 1);
+                var_E = avg_E2 - avg_E * avg_E;
+
+                avg_Mabs = cumul_Mabs / (i + 1);
+
+                cumul_mabs = cumul_Mabs / N;
+
+                avg_M2 = cumul_M2 / (i + 1);
+                avg_Mabs2 = avg_Mabs * avg_Mabs;
+
+                var_M = avg_M2 - avg_Mabs2;
+
+                avg_e = avg_E / N;
+                avg_mabs = avg_Mabs / N;
+
+                Cv = (var_E) / (N * kb * T * T);
+                chi = (var_M) / (N * kb * T);
+                // if (i % 100000 == 0)
+                //{
+                //     std::cout << "i = " << (i / (1000000. * 400)) * 100 << std::endl;
+                // }
+                //  file1
+                //      << config << std::endl;
+
+                output_data(mc_counter, 0) = avg_e;
+                output_data(mc_counter, 1) = avg_mabs;
+                output_data(mc_counter, 2) = Cv;
+                output_data(mc_counter, 3) = chi;
+
+                mc_counter += 1;
+
+                // file2 << std::setw(25) << std::setprecision(15)
+                //       << avg_e << " " << avg_mabs << " " << Cv << " " << chi
+                //       << std::endl;
             }
         }
     }
-    file1.close();
+    file2.open(filename2);
+    output_data.save(file2, arma::csv_ascii);
+    // file1.close();
     file2.close();
 }
 
