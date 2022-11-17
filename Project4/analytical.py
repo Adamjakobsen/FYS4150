@@ -89,10 +89,11 @@ data = np.array([exp_E_N, exp_M_N, C_v_analyt, chi_analyt])
 file = np.savetxt('analytical_values_L_2.txt', [data], delimiter = ' ')
 
 """Computing relative errors to compare analytical with numerical """
+#no burn time implemented 
 
-data_sim3 = np.loadtxt('quantities_L_2_mc_1000.txt') #output: avg_e << " " << avg_mabs << " " << Cv << " " << chi
-# data_sim6 = np.loadtxt('quantities_L_2_mc_1000000.txt')
-# data_sim8 = np.loadtxt('quantities_L_2_mc_100000000.txt')
+data_sim3 = np.loadtxt('./2/qt_L2_A0_mc1000_burn0_t1.000000.txt') #output: avg_e << " " << avg_mabs << " " << Cv << " " << chi
+data_sim6 = np.loadtxt('./2/qt_L2_A0_mc1000000_burn0_t1.000000.txt')
+data_sim8 = np.loadtxt('./2/qt_L2_A0_mc100000000_burn0_t1.000000.txt')
 
 #extract last values from the simulated data file to get the most accurate MC cycle output 
 def relative_error(data):
@@ -109,8 +110,8 @@ def relative_error(data):
     return(delta_exp_E_N3, delta_exp_M_N3, delta_C_v3, delta_chi3)
     
 mc_3 = relative_error(data_sim3)
-# mc_6 = relative_error(data_sim6)
-# mc_8 = relative_error(data_sim8)
+mc_6 = relative_error(data_sim6)
+mc_8 = relative_error(data_sim8)
 
 print("Relative errors for MC = 10^3")
 print("Relative error of exp. energy per spin = ", mc_3[0])
@@ -118,18 +119,17 @@ print("Relative error of exp. magnetisation per spin = " , mc_3[1])
 print("Relative error of exp. C_v = ", mc_3[2])
 print("Relative error of exp. chi = ", mc_3[3])
 
+print("Relative errors for MC = 10^6")
+print("Relative error of exp. energy per spin = ", mc_6[0])
+print("Relative error of exp. magnetisation per spin = " , mc_6[1])
+print("Relative error of exp. C_v = ", mc_6[2])
+print("Relative error of exp. chi = ", mc_6[3])
 
-# print("Relative errors for MC = 10^6")
-# print("Relative error of exp. energy per spin = ", mc_3[0])
-# print("Relative error of exp. magnetisation per spin = " , mc_3[1])
-# print("Relative error of exp. C_v = ", mc_3[2])
-# print("Relative error of exp. chi = ", mc_3[3])
-
-# print("Relative errors for MC = 10^8")
-# print("Relative error of exp. energy per spin = ", mc_3[0])
-# print("Relative error of exp. magnetisation per spin = " , mc_3[1])
-# print("Relative error of exp. C_v = ", mc_3[2])
-# print("Relative error of exp. chi = ", mc_3[3])
+print("Relative errors for MC = 10^8")
+print("Relative error of exp. energy per spin = ", mc_8[0])
+print("Relative error of exp. magnetisation per spin = " , mc_8[1])
+print("Relative error of exp. C_v = ", mc_8[2])
+print("Relative error of exp. chi = ", mc_8[3])
 
 # data_sim5 = np.loadtxt('quantities_L_2_mc_1000.txt')
 # mc_5 = relative_error(data_sim5)
