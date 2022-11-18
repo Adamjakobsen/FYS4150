@@ -14,7 +14,10 @@
 # Precompiled Headers
 *.gch
 *.pch
+# Data files
 
+*.txt
+*.csv
 # Compiled Dynamic libraries
 *.so
 *.dylib
