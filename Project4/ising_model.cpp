@@ -146,16 +146,12 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
         p_vec(i) = std::exp(-beta * delta_e_vec(i));
     }
 
-    std::ofstream file_s1;
-    std::ofstream file_s2;
-    std::ofstream file_s3;
+    std::ofstream file1;
 
     std::string rounded_T = std::to_string(T).substr(0, std::to_string(T).find(".") + 3 + 1);
 
     std::cout << "T: " << T << std::endl;
-    std::string filename1 = std::to_string(L) + "/s1_cfg_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".csv";
-    std::string filename2 = std::to_string(L) + "/s2_cfg_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".csv";
-    std::string filename3 = std::to_string(L) + "/s3_cfg_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".csv";
+    std::string filename1 = std::to_string(L) + "/qt_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".csv";
 
     // avg will always be wrt to the number of mc cycles
     double E = 0;
@@ -187,15 +183,7 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
     double chi = 0;
     arma::mat config = init_random_config(L, E, M, align);
 
-    file_s1.open(filename1);
-    file_s2.open(filename2);
-    file_s3.open(filename3);
-
-    config.save(file_s1, arma::csv_ascii);
-    file_s1.close();
-
     double N = L * L;
-
     int time_steps = mc_cycles * N;
     int burn_in = int((burn_pct / 100.) * mc_cycles);
     int mc_counter = 0;
@@ -204,11 +192,6 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
     for (int i = 0; i < mc_cycles; i++)
     {
         config = evolve(config, beta, E, M, p_vec);
-        if (i == int(mc_cycles / 2))
-        {
-            config.save(file_s2, arma::csv_ascii);
-            file_s2.close();
-        }
 
         cumul_E += E;
         cumul_E2 += E * E;
@@ -242,8 +225,9 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
             output_data(i, 3) = chi;
         }
     }
-    config.save(file_s3, arma::csv_ascii);
-    file_s3.close();
+    file1.open(filename1);
+    output_data.save(file1, arma::csv_ascii);
+    file1.close();
 }
 
 int mt_random_int(int low, int high)
