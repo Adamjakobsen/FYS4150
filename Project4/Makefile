@@ -1,5 +1,5 @@
 compile: 
-	CPATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib g++-12 ising_model.cpp -std=c++11 -larmadillo  -fopenmp -o main -O3 
+	CPATH=/opt/homebrew/include LIBRARY_PATH=/opt/homebrew/lib g++-12 main_ising.cpp -std=c++11 -larmadillo  -fopenmp -o main -O3 
 
 run:
 	./main $(L) $(mc_cycles) $(burn_pct) $(lower_temp) $(upper_temp) $(temp_step) $(align) $(output)
