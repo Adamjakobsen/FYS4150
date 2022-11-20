@@ -3,14 +3,12 @@ import matplotlib.pyplot as plt
 import random
 from pandas import read_csv
 
-
 #define constants 
 T = 1 #J/k_B
 J = 1
 k_B = 1
 N = 4
 beta = 1/(k_B*T)
-L = 2
 
 #define equipartition function 
 Z = 2*np.exp(8*beta*J) + 2*np.exp(-8*beta*J) + 12
@@ -114,26 +112,10 @@ def relative_error(data):
     delta_chi3 = abs((chi_mc - chi_analyt)/chi_analyt)
     
     return(delta_exp_E_N3, delta_exp_M_N3, delta_C_v3, delta_chi3)
-    
-# e_mc = qts_mc3[-1][0]
-# m_mc = qts_mc3[-1][1]
-# C_v_mc = qts_mc3[-1][2]
-# chi_mc = qts_mc3[-1][3]
-
-# delta_e_mc3 = abs((e_mc - e)/e)   
-# delta_m_mc3 = abs((m_mc - m)/m)
-# delta_C_v3 = abs((C_v_mc - C_v_analyt)/C_v_analyt)
-# delta_chi3 = abs((chi_mc - chi_analyt)/chi_analyt)
-
-# print(delta_e_mc3)
-# print(delta_m_mc3)
-# print(delta_C_v3)
-# print(delta_chi3)
 
 mc_3 = relative_error(qts_mc3)
 mc_6 = relative_error(qts_mc6)
 mc_8 = relative_error(qts_mc8)
-# print(mc_3)
 
 print("Relative errors for MC = 10^3")
 print("Relative error of exp. energy per spin = ", mc_3[0])
