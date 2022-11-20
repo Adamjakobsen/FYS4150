@@ -256,20 +256,20 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
 
             Cv = (var_E * beta) / (N * T);
             chi = (var_M * beta) / (N);
-            if (output == "qt_all")
+            if (output == "all_qt")
             {
                 output_qt_all(i - burn_in, 0) = avg_e;
                 output_qt_all(i - burn_in, 1) = avg_mabs;
                 output_qt_all(i - burn_in, 2) = Cv;
                 output_qt_all(i - burn_in, 3) = chi;
                 output_qt_all(i - burn_in, 4) = T;
-                epsilons(i - burn_in) = E / N;
             }
+            epsilons(i - burn_in) = E / N;
         }
     }
 
     // notice this is outside the loop
-    if (output == "qt_all")
+    if (output == "all_qt")
     {
         output_qt_all.save(file1, arma::csv_ascii);
         file1.close();
