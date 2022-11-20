@@ -36,5 +36,5 @@ Understanding possible output parameters:
   - output = "grid" outputs three configurations of the lattice grid: the initialized one, the one at half the Monte Carlo cycles, and the final configuration.
   
   
- Important information about generated files:
+ **Important information about generated files:**
   - The C++ code requires the user to have a folder called "data" with the subfolders "20", "40", "60", "80" and "100" in order to put the datafiles. Github does not comport empty folders and since we are not supposed to load the files to the repository, there is no "data" folder visible.
