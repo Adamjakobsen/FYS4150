@@ -11,21 +11,19 @@
 #include <stdlib.h>  /* srand, rand */
 
 arma::mat init_random_config(int L, double &exp_E, double &exp_M, int align);
-arma::mat evolve(arma::mat config, double beta, double &exp_E, double &exp_M, arma::vec p_vec);
+arma::mat metropolis(arma::mat config, double beta, double &exp_E, double &exp_M, arma::vec p_vec);
 int mt_random_int(int low, int high);
 double mt_random_float(int low, int high);
+std::mt19937 gen(42);
 
-void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int thread_id);
-std::random_device rd;
-std::mt19937 gen(rd()); // gen(2) for a seed of 2
+void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int thread_id, std::string output, double lower_temp, double upper_temp);
+
 // define your physical system's variables here:
 
 double kb = 1.;
 int main(int argc, char *argv[])
 {
-    // main will only evolve the system and output the results to a file in matrix form
-    // we will leave the find the total energy of config and other quantities of the system to python
-    // here we just evolve and output the results
+    // main will evolve the system and output the results to a file in matrix form
 
     int L = atoi(argv[1]);
 
@@ -35,7 +33,8 @@ int main(int argc, char *argv[])
     double upper_temp = atof(argv[5]);
     double temp_step = atof(argv[6]);
     int align = atoi(argv[7]); // 0 = random, 1 = aligned up (1), 2 = aligned down (-1)
-    double original_temp_step = temp_step;
+    std::string output = argv[8];
+
     int temp_n = int((upper_temp - lower_temp) / temp_step);
 
 #pragma omp parallel
@@ -47,15 +46,7 @@ int main(int argc, char *argv[])
         for (iter_ = 0; iter_ < temp_n + 1; iter_++)
         {
             T = lower_temp + iter_ * temp_step;
-            if (T > 2.2 && T <= 2.4)
-            {
-                temp_step = 0.1 * original_temp_step;
-            }
-            if (T > 2.4)
-            {
-                temp_step = original_temp_step;
-            }
-            monte_carlo(L, mc_cycles, burn_pct, T, align, omp_get_thread_num());
+            monte_carlo(L, mc_cycles, burn_pct, T, align, omp_get_thread_num(), output, lower_temp, upper_temp);
             std::cout << "Thread " << omp_get_thread_num() << " finished T = " << T << std::endl;
         }
     }
@@ -97,7 +88,7 @@ arma::mat init_random_config(int L, double &E, double &M, int align)
     return config;
 }
 
-arma::mat evolve(arma::mat config, double beta, double &E, double &M, arma::vec p_vec)
+arma::mat metropolis(arma::mat config, double beta, double &E, double &M, arma::vec p_vec)
 {
     int L = config.n_rows;
     for (int iter = 0; iter < L * L; iter++)
@@ -136,7 +127,7 @@ arma::mat evolve(arma::mat config, double beta, double &E, double &M, arma::vec 
     return config;
 }
 
-void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int thread_id)
+void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int thread_id, std::string output, double lower_temp, double upper_temp)
 {
     double beta = 1. / (kb * T);
     arma::vec p_vec = arma::zeros<arma::vec>(5);
@@ -147,11 +138,42 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
     }
 
     std::ofstream file1;
+    std::ofstream file2;
+    std::ofstream file3;
 
-    std::string rounded_T = std::to_string(T).substr(0, std::to_string(T).find(".") + 3 + 1);
+    std::string rounded_T = std::to_string(T).substr(0, std::to_string(T).find(".") + 4);
+    std::string lower_T = std::to_string(lower_temp).substr(0, std::to_string(lower_temp).find(".") + 4);
+    std::string upper_T = std::to_string(upper_temp).substr(0, std::to_string(upper_temp).find(".") + 4);
+    std::string str_L = std::to_string(L);
+    std::string str_mc_cycles = std::to_string(mc_cycles);
+    std::string str_burn_pct = std::to_string(burn_pct);
+    std::string str_align = std::to_string(align);
 
     std::cout << "T: " << T << std::endl;
-    std::string filename1 = std::to_string(L) + "/qt_L" + std::to_string(L) + "_A" + std::to_string(align) + "_mc" + std::to_string(mc_cycles) + "_burn" + std::to_string(burn_pct) + "_t" + rounded_T + ".csv";
+    std::string filename1;
+    std::string filename2;
+    std::string filename3;
+    if (output == "all_qt" || output == "last_qt")
+    {
+        std::cout << "upper_temp" << upper_temp << "lower_temp" << lower_temp << std::endl;
+        filename1 = "data/" + str_L + "/" + output + "_L" + str_L + "_A" + str_align + "_mc" + str_mc_cycles + "_burn" + str_burn_pct + "_lt" + lower_T + "_ut" + upper_T + ".csv";
+    }
+    else if (output == "grid")
+    {
+
+        filename1 = "data/" + str_L + "/s1_cfg_L" + str_L + "_A" + str_align + "_mc" + str_mc_cycles + "_burn" + str_burn_pct + "_t" + rounded_T + ".csv";
+        filename2 = "data/" + str_L + "/s2_cfg_L" + str_L + "_A" + str_align + "_mc" + str_mc_cycles + "_burn" + str_burn_pct + "_t" + rounded_T + ".csv";
+        filename3 = "data/" + str_L + "/s3_cfg_L" + str_L + "_A" + str_align + "_mc" + str_mc_cycles + "_burn" + str_burn_pct + "_t" + rounded_T + ".csv";
+    }
+    else if (output == "epsilons")
+    {
+        filename1 = "data/" + str_L + "/epsilons_L" + str_L + "_A" + str_align + "_mc" + str_mc_cycles + "_burn" + str_burn_pct + "_lt" + lower_T + "_ut" + upper_T + ".csv";
+    }
+    else
+    {
+        std::cout << "Invalid output type" << std::endl;
+        return;
+    }
 
     // avg will always be wrt to the number of mc cycles
     double E = 0;
@@ -183,20 +205,37 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
     double chi = 0;
     arma::mat config = init_random_config(L, E, M, align);
 
+    file1.open(filename1, std::ofstream::app);
+    if (output == "grid")
+    {
+        file2.open(filename2, std::ofstream::app);
+        file3.open(filename3, std::ofstream::app);
+        config.save(file1, arma::csv_ascii);
+        file1.close();
+    }
+
     double N = L * L;
-    int time_steps = mc_cycles * N;
     int burn_in = int((burn_pct / 100.) * mc_cycles);
     int mc_counter = 0;
 
-    arma::mat output_data = arma::zeros<arma::mat>(mc_cycles, 4);
+    arma::mat output_qt_all = arma::zeros<arma::mat>(mc_cycles - burn_in, 5);
+    arma::mat output_last_qt = arma::zeros<arma::mat>(1, 5); // for the last row of the qt file to avoid loading a huge file if that is now asked
+    arma::mat epsilons = arma::zeros<arma::mat>(mc_cycles - burn_in, 1);
+
     for (int i = 0; i < mc_cycles; i++)
     {
-        config = evolve(config, beta, E, M, p_vec);
+        config = metropolis(config, beta, E, M, p_vec);
 
         cumul_E += E;
         cumul_E2 += E * E;
         cumul_Mabs += std::abs(M);
         cumul_M2 += M * M;
+
+        if ((output == "grid") && i == int(mc_cycles / 2))
+        {
+            config.save(file2, arma::csv_ascii);
+            file2.close();
+        }
 
         if (i >= burn_in)
         {
@@ -206,7 +245,6 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
             var_E = avg_E2 - avg_E * avg_E;
 
             avg_Mabs = cumul_Mabs / (i + 1);
-            cumul_mabs = cumul_Mabs / N;
 
             avg_M2 = cumul_M2 / (i + 1);
             avg_Mabs2 = avg_Mabs * avg_Mabs;
@@ -216,18 +254,46 @@ void monte_carlo(int L, int mc_cycles, int burn_pct, double T, int align, int th
             avg_e = avg_E / N;
             avg_mabs = avg_Mabs / N;
 
-            Cv = (var_E) / (N * kb * T * T);
-            chi = (var_M) / (N * kb * T);
-
-            output_data(i, 0) = avg_e;
-            output_data(i, 1) = avg_mabs;
-            output_data(i, 2) = Cv;
-            output_data(i, 3) = chi;
+            Cv = (var_E * beta) / (N * T);
+            chi = (var_M * beta) / (N);
+            if (output == "qt_all")
+            {
+                output_qt_all(i - burn_in, 0) = avg_e;
+                output_qt_all(i - burn_in, 1) = avg_mabs;
+                output_qt_all(i - burn_in, 2) = Cv;
+                output_qt_all(i - burn_in, 3) = chi;
+                output_qt_all(i - burn_in, 4) = T;
+                epsilons(i - burn_in) = E / N;
+            }
         }
     }
-    file1.open(filename1);
-    output_data.save(file1, arma::csv_ascii);
-    file1.close();
+
+    // notice this is outside the loop
+    if (output == "qt_all")
+    {
+        output_qt_all.save(file1, arma::csv_ascii);
+        file1.close();
+    }
+    else if (output == "last_qt")
+    {
+        output_last_qt(0, 0) = avg_e;
+        output_last_qt(0, 1) = avg_mabs;
+        output_last_qt(0, 2) = Cv;
+        output_last_qt(0, 3) = chi;
+        output_last_qt(0, 4) = T;
+        output_last_qt.save(file1, arma::csv_ascii);
+        file1.close();
+    }
+    else if (output == "epsilons")
+    {
+        epsilons.save(file1, arma::csv_ascii);
+        file1.close();
+    }
+    else if (output == "grid")
+    {
+        config.save(file3, arma::csv_ascii);
+        file3.close();
+    }
 }
 
 int mt_random_int(int low, int high)
