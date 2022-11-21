@@ -1,5 +1,7 @@
-#include "include/utils.hpp"
+#include "./include/utils.hpp"
 
+std::mt19937 gen(42);
+double kb=1.;
 arma::mat init_random_config(int L, double &E, double &M, int align)
 {
     int N = L * L;

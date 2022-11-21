@@ -1,5 +1,5 @@
 #include <string>
-#include "include/utils.hpp"
+#include "./include/utils.hpp"
 
 // define your physical system's variables here:
 
