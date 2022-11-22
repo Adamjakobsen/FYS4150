@@ -7,12 +7,16 @@ We implemented the 2D lattice version of the Ising model, using a 2x2 case as ou
 We increased the lattice size gradually and ran for multiple Monte Carlo cycles.
 
 
-Compile: 
+Compile for mac users: 
 ```
-make compile
+make compile_mac
 ```
 OBS: notice that the cpath in the make file is user-specific and might require changing  
 
+Compile for linux users: 
+```
+make compile_linux
+```
 
 Run example:
 ```
