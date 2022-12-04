@@ -79,7 +79,37 @@ void Schrodinger::set_potential(string slits)
             }
         }
     }
+
+    
     }
+
+    
+    //Triple slit
+    if (slits=="triple")
+    {
+    int start_y=pos_to_idx(0.5-0.01);
+    int end_y=pos_to_idx(0.5+0.01);
+
+    int middle_start_x=pos_to_idx(0.5-0.05/2);
+    int middle_end_x=pos_to_idx(0.5+0.05/2);
+
+    int left_start_x=pos_to_idx(0.5-0.075-0.05);
+    int left_end_x=pos_to_idx(0.5-0.075);
+
+    int right_start_x=pos_to_idx(0.5+0.075);
+    int right_end_x=pos_to_idx(0.5+0.075+0.05);
+
+    V.submat(arma::span(start_y,end_y), arma::span(middle_start_x,middle_end_x))=arma::zeros<arma::cx_mat>(end_y-start_y+1,middle_end_x-middle_start_x+1); 
+    V.submat(arma::span(start_y,end_y), arma::span(left_start_x,left_end_x))    =arma::zeros<arma::cx_mat>(end_y-start_y+1,left_end_x-left_start_x+1); 
+    V.submat(arma::span(start_y,end_y), arma::span(right_start_x,right_end_x))  =arma::zeros<arma::cx_mat>(end_y-start_y+1,right_end_x-right_start_x+1); 
+    }
+    
+
+    
+    
+
+
+
     V.save("./data/V.bin");
     
         
@@ -126,7 +156,9 @@ void Schrodinger::set_A_B()
 
         }
         
-    }        
+    }
+    
+             
 }
 
 arma::cx_vec Schrodinger::evolve(arma::cx_vec u_vec){
