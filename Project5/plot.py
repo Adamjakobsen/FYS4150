@@ -12,11 +12,13 @@ U= np.array(data,dtype=np.clongdouble)
 print(U[0,0])
 print(np.shape(U))
 
+
+
 U_0= U[:,0]
 #reshape U_0
 h=0.005
 dt=2.5e-5
-N=int(1/h-2)
+N=int(1/h-1)
 U_0= np.reshape(U_0,(N,N))
 
 
@@ -26,6 +28,11 @@ P_cube= np.real(np.reshape(P,(N,N,len(U[0,:]))))
 V_data= pa.cx_mat()
 V_data.load("./data/V.bin", pa.arma_binary)
 V= np.array(V_data,dtype=np.clongdouble)
+plt.contourf(np.real(V))
+plt.savefig("V.png")
+plt.close()
+
+
 
 
 
@@ -36,21 +43,25 @@ x_points = np.linspace(0, 1, N)
 y_points = np.linspace(0, 1, N)
 x,y = np.meshgrid(x_points,y_points)
 t_points= np.arange(0,1+dt,dt)
-#adjust colorcale to max value of P_cube
-plt.contourf(P_cube[:,:,0], 100, cmap='jet')
-#adjust colorcale to max value of P_cube
 
-plt.show()
+idx_detector= int(0.8/h)
+plt.plot(y_points,P_cube[idx_detector,:,-1])
+plt.savefig("P_0.8.png")
+plt.close()
 
 for i in range(len(P_cube[0,0,:])):
-    plt.plot(t_points[i],np.sum(P_cube[:,:,i]),'o')
-plt.show()
+    plt.plot(t_points[i],np.log(np.sum(P_cube[:,:,i])),'or')
+
+plt.savefig("P.png")
+plt.close()
+
 
 # Some settings
 fontsize = 12
 t_min = t_points[0]
 x_min, x_max = x_points[0], x_points[-1]
 y_min, y_max = y_points[0], y_points[-1]
+
 
 # Create figure
 fig = plt.figure()
@@ -84,7 +95,7 @@ def animation(i):
     img.set_norm(norm)
 
     # Update z data
-    img.set_data((P_cube[:,:,i]))
+    img.set_data((P_cube[:,:,i].T))
 
     # Update the time label
     current_time = t_min + i * dt
@@ -96,4 +107,6 @@ def animation(i):
 anim = FuncAnimation(fig, animation, interval=1, frames=np.arange(0, len(P_cube[0,0,:]), 2), repeat=True, blit=0)
 
 # Run the animation!
-plt.show() 
+anim.save("./animation.mp4",writer="ffmpeg", fps=30, dpi=300)
+plt.show()
+
