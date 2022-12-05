@@ -9,7 +9,7 @@ We will be using our simulation to study the double-slit experiment.
  make compile
  ```
  
- #Run
+ # Run
  Produce data for one problem at a time:
  ```
  make run_"problem"
@@ -20,4 +20,12 @@ or simply produce all the data at one:
 
 ```
  make run_all
+ ```
+ 
+ # plot
+ 
+ For plotting run:
+ 
+ ```
+ python3 plot.py "problem"
  ```
