@@ -40,45 +40,43 @@ void Schrodinger::set_potential(string slits)
     // set potential
     
     V = arma::zeros<arma::cx_mat>(M,M);
+    int width_walls=pos_to_idx(0.02);
+    V.cols(0,width_walls).fill(v0);
     
-    V.col(0)=arma::cx_vec(M).fill(v0);
-    
-    V.col(M-1).fill(v0);
-    V.row(0).fill(v0);
-    V.row(M-1).fill(v0);
+    V.cols(M-1-width_walls ,M-1)= arma::ones<arma::cx_mat>(M,width_walls+1)*v0;
+    V.rows(0,width_walls) = arma::ones<arma::cx_mat>(width_walls+1,M)*v0;
+    V.rows(M-1-width_walls ,M-1)= arma::ones<arma::cx_mat>(width_walls+1,M)*v0;
     cout<<"v0:"<<v0 <<endl;
-    V.row(pos_to_idx(0.5)).fill(v0);
+    V.rows(pos_to_idx(0.5-0.01),pos_to_idx(0.5+0.01))=arma::ones<arma::cx_mat>(width_walls+1,M)*v0;
+
+
+    int start_x=pos_to_idx(0.5-0.01);
+    int end_x=pos_to_idx(0.5+0.01);
     
     if (slits=="double")
     
-    {
-        cout<<"double slits"<<endl;
-        for (int i=0;i<M;i++){
-        if ( (i>=pos_to_idx(0.5-0.075)) && (i<=pos_to_idx(0.5-0.05/2))){
+    {   
+        int left_start_y=pos_to_idx(0.5-0.075);
+        int left_end_y=pos_to_idx(0.5-0.025);
 
-            for (int j=pos_to_idx(0.5-0.01);j<=pos_to_idx(0.5+0.01);j++){
-                V(j,i)=0;
-            }
-        }
-        if ( (i>=pos_to_idx(0.5+0.05/2)) && (i<=pos_to_idx(0.5+0.05+0.05/2)) ){
-            for (int j=pos_to_idx(0.5-0.01);j<=pos_to_idx(0.5+0.01);j++){
-                V(j,i)=0;
-            }
-            
-        }
+        int right_start_y=pos_to_idx(0.5+0.025);
+        int right_end_y=pos_to_idx(0.5+0.075)+1;
+
+        V.submat(arma::span(start_x,end_x), arma::span(left_start_y,left_end_y))    =arma::zeros<arma::cx_mat>(end_x-start_x+1,left_end_y-left_start_y+1); 
+        V.submat(arma::span(start_x,end_x), arma::span(right_start_y,right_end_y))  =arma::zeros<arma::cx_mat>(end_x-start_x+1,right_end_y-right_start_y+1); 
+        
+        
     }
-    }
+    
     //make slit in middle wall
     if (slits=="single")
-    {
-        for (int i=0;i<M;i++){
-        if (i>=pos_to_idx(0.5-0.05/2) && i<=pos_to_idx(0.5+0.05/2)){
-            
-            for (int j=pos_to_idx(0.5-0.01);j<=pos_to_idx(0.5+0.01);j++){
-                V(j,i)=0;
-            }
-        }
-    }
+    {   
+        int middle_start_y=pos_to_idx(0.5-0.025);
+        int middle_end_y=pos_to_idx(0.5+0.025);
+        V.submat(arma::span(start_x,end_x), arma::span(middle_start_y,middle_end_y))=arma::zeros<arma::cx_mat>(end_x-start_x+1,middle_end_y-middle_start_y+1); 
+
+        
+        
 
     
     }
@@ -87,21 +85,20 @@ void Schrodinger::set_potential(string slits)
     //Triple slit
     if (slits=="triple")
     {
-    int start_y=pos_to_idx(0.5-0.01);
-    int end_y=pos_to_idx(0.5+0.01);
+    
 
-    int middle_start_x=pos_to_idx(0.5-0.05/2);
-    int middle_end_x=pos_to_idx(0.5+0.05/2);
+    int middle_start_y=pos_to_idx(0.5-0.025);
+    int middle_end_y=pos_to_idx(0.5+0.025);
 
-    int left_start_x=pos_to_idx(0.5-0.075-0.05);
-    int left_end_x=pos_to_idx(0.5-0.075);
+    int left_start_y=pos_to_idx(0.5-0.075-0.05);
+    int left_end_y=pos_to_idx(0.5-0.075)+1;
 
-    int right_start_x=pos_to_idx(0.5+0.075);
-    int right_end_x=pos_to_idx(0.5+0.075+0.05);
+    int right_start_y=pos_to_idx(0.5+0.075);
+    int right_end_y=pos_to_idx(0.5+0.075+0.05);
 
-    V.submat(arma::span(start_y,end_y), arma::span(middle_start_x,middle_end_x))=arma::zeros<arma::cx_mat>(end_y-start_y+1,middle_end_x-middle_start_x+1); 
-    V.submat(arma::span(start_y,end_y), arma::span(left_start_x,left_end_x))    =arma::zeros<arma::cx_mat>(end_y-start_y+1,left_end_x-left_start_x+1); 
-    V.submat(arma::span(start_y,end_y), arma::span(right_start_x,right_end_x))  =arma::zeros<arma::cx_mat>(end_y-start_y+1,right_end_x-right_start_x+1); 
+    V.submat(arma::span(start_x,end_x), arma::span(middle_start_y,middle_end_y))=arma::zeros<arma::cx_mat>(end_x-start_x+1,middle_end_y-middle_start_y+1); 
+    V.submat(arma::span(start_x,end_x), arma::span(left_start_y,left_end_y))    =arma::zeros<arma::cx_mat>(end_x-start_x+1,left_end_y-left_start_y+1); 
+    V.submat(arma::span(start_x,end_x), arma::span(right_start_y,right_end_y))  =arma::zeros<arma::cx_mat>(end_x-start_x+1,right_end_y-right_start_y+1); 
     }
     
 
@@ -135,7 +132,7 @@ void Schrodinger::set_A_B()
         
         i=k/(M-2);
         j=k%(M-2);
-        ak = 1. + 4.*r -1i*dt*V(i,j)/2.;
+        ak = 1. + 4.*r +1i*dt*V(i,j)/2.;
         bk = 1. - 4.*r -1i*dt*V(i,j)/2.;
         A(k,k)=ak;
         B(k,k)=bk;
@@ -155,8 +152,11 @@ void Schrodinger::set_A_B()
             B(ij_k(i,j-1) , k)=r;
 
         }
+
         
     }
+    A.save("./data/A.bin");
+    cout<<"A set"<<endl;
     
              
 }
