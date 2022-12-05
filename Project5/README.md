@@ -1,15 +1,15 @@
-## Simulating time-dependent two dimensional Schrödinger equation
+# Simulating time-dependent two dimensional Schrödinger equation
 
 We will be using our simulation to study the double-slit experiment. 
 
 
-# compile
+## compile
 
  ```
  make compile
  ```
  
- # Run
+ ## Run
  Produce data for one problem at a time:
  ```
  make run_"problem"
@@ -22,7 +22,7 @@ or simply produce all the data at one:
  make run_all
  ```
  
- # plot
+ ## plot
  
  For plotting run:
  
