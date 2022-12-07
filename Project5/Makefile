@@ -1,5 +1,5 @@
 compile:
-	g++ main.cpp ./src/schrodinger.cpp ./include/Schrodinger.hpp -larmadillo -o main
+	g++ main.cpp ./src/schrodinger.cpp -std=c++11 -larmadillo -o main
 
 run_P7_1:
 	./main input_P7_1

@@ -100,9 +100,7 @@ void Schrodinger::set_A_B()
     A = arma::sp_cx_mat((M - 2) * (M - 2), (M - 2) * (M - 2));
     B = arma::sp_cx_mat((M - 2) * (M - 2), (M - 2) * (M - 2));
 
-    complex<double> ak;
-    complex<double> bk;
-    complex<double> r = 1i * dt / (2 * h * h);
+    arma::cx_double r(0, dt / (2 * h * h));
 
     int i;
     int j;
@@ -112,8 +110,8 @@ void Schrodinger::set_A_B()
         i = k / (M - 2);
         j = k % (M - 2);
 
-        ak = 1. + 4. * r + 1i * dt * V(i, j) / 2.;
-        bk = 1. - 4. * r - 1i * dt * V(i, j) / 2.;
+        arma::cx_double ak(1., 4. * imag(r) + dt * real(V(i, j)) / 2.);
+        arma::cx_double bk(1., -4. * imag(r) - dt * real(V(i, j)) / 2.);
         A(k, k) = ak;
         B(k, k) = bk;
 
@@ -154,7 +152,8 @@ complex<double> Schrodinger::gaussian(double x, double y, double sigma_x, double
 {
     // gaussian wavepacket
     complex<double> psi;
-    psi = exp(-pow(x - x0, 2) / (2 * pow(sigma_x, 2)) - pow(y - y0, 2) / (2 * pow(sigma_y, 2))) * exp(1i * (px * (x - x0) + py * (y - y0)));
+    arma::cx_double i_cx(0, 1);
+    psi = exp(-pow(x - x0, 2) / (2 * pow(sigma_x, 2)) - pow(y - y0, 2) / (2 * pow(sigma_y, 2))) * exp(i_cx * (px * (x - x0) + py * (y - y0)));
     return psi;
 }
 
