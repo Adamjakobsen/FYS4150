@@ -148,12 +148,12 @@ arma::cx_vec Schrodinger::evolve(arma::cx_vec u_vec)
     return u_vec_new;
 }
 
-complex<double> Schrodinger::gaussian(double x, double y, double sigma_x, double sigma_y, double x0, double y0, double px, double py)
+arma::cx_double Schrodinger::gaussian(double x, double y, double sigma_x, double sigma_y, double x0, double y0, double px, double py)
 {
     // gaussian wavepacket
     complex<double> psi;
-    arma::cx_double i_cx(0, 1);
-    psi = exp(-pow(x - x0, 2) / (2 * pow(sigma_x, 2)) - pow(y - y0, 2) / (2 * pow(sigma_y, 2))) * exp(i_cx * (px * (x - x0) + py * (y - y0)));
+    arma::cx_double exponent_cx(-pow(x - x0, 2) / (2 * pow(sigma_x, 2)) - pow(y - y0, 2) / (2 * pow(sigma_y, 2)), (px * (x - x0) + py * (y - y0)));
+    psi = exp(exponent_cx);
     return psi;
 }
 
