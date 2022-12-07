@@ -141,10 +141,11 @@ arma::cx_vec Schrodinger::evolve(arma::cx_vec u_vec)
 {
     arma::superlu_opts opts;
     opts.symmetric = true;
+    opts.allow_ugly = true;
     // evolve wavefunction
     arma::cx_vec u_vec_new;
     u_vec_new = arma::zeros<arma::cx_vec>(u_vec.n_elem);
-    u_vec_new = arma::spsolve(A, B * u_vec, "superlu", opts);
+    u_vec_new = arma::spsolve(A, B * u_vec);
     return u_vec_new;
 }
 
@@ -173,6 +174,7 @@ arma::cx_mat Schrodinger::initialise_state(double sigma_x, double sigma_y, doubl
 
     // Normalize
     U = U / sqrt(arma::accu(arma::conj(U) % U));
+    cout << "Initial state norm: " << arma::accu(arma::conj(U) % U) << endl;
 
     return U;
 }
