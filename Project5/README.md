@@ -29,3 +29,7 @@ or simply produce all the data at one:
  ```
  python3 plot.py "problem"
  ```
+ 
+ ## Animation
+ 
+ ![triple](fig/animation.jpg)
