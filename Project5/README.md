@@ -1,4 +1,9 @@
 # Simulating time-dependent two dimensional Schrödinger equation
+The Schrödinger equation is a fundamental equation in quantum mechanics that describes the time evolution of a quantum system. It is a partial differential equation that can be written in many different ways, but in the context of a two-dimensional system it takes the form:
+
+$$i \hbar \frac{\partial \psi}{\partial t} = -\frac{\hbar^2}{2m} \left( \frac{\partial^2 \psi}{\partial x^2} + \frac{\partial^2 \psi}{\partial y^2} \right) + V(x,y,t) \psi(x,y,t)$$
+
+where $\psi(x,y,t)$ is the wavefunction of the system, $i$ is the imaginary unit, $\hbar$ is the reduced Planck constant, $m$ is the mass of the particle, and $V(x,y,t)$ is the potential energy of the particle at position $(x,y)$ and time $t$.
 
 We will be using our simulation to study the double-slit experiment. 
 
@@ -16,7 +21,7 @@ We will be using our simulation to study the double-slit experiment.
  ```
 where "problem" can be `P7_1`, `P7_2`, `P8`, `P9_single`, `P9_double` or `P9_triple`.
 
-or simply produce all the data at one:
+or simply produce all the data at once:
 
  ```
  make run_all
