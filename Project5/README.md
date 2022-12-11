@@ -32,4 +32,4 @@ or simply produce all the data at one:
  
  ## Animation
  
- ![triple](fig/animation.jpg)
+ ![triple](fig/animation.mp4)
