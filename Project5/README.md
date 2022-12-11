@@ -5,7 +5,9 @@ $$i \hbar \frac{\partial \psi}{\partial t} = -\frac{\hbar^2}{2m} \left( \frac{\p
 
 where $\psi(x,y,t)$ is the wavefunction of the system, $i$ is the imaginary unit, $\hbar$ is the reduced Planck constant, $m$ is the mass of the particle, and $V(x,y,t)$ is the potential energy of the particle at position $(x,y)$ and time $t$.
 
-We will be using our simulation to study the double-slit experiment. 
+One possible method for simulating the Schrödinger equation is the Crank-Nicolson method, which is a finite difference method that approximates the time derivative using a combination of forward and backward differences.
+
+We will be using our simulation to study the double-slit experiment and other slit-configurations. 
 
 
 ## compile
