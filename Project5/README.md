@@ -40,7 +40,9 @@ or simply produce all the data at once:
  ## Animation
  
  We present animations produced from our simulation:
-  ### Double-slit configuration
+  ### Single-slit configuration
+ ![](fig/animation_single.gif)
+ ### Double-slit configuration
  ![](fig/animation_double.gif)
  ### Triple-slit configuration
  ![](fig/animation_triple.gif)
