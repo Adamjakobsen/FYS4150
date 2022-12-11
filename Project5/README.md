@@ -18,7 +18,7 @@ where "problem" can be `P7_1`, `P7_2`, `P8`, `P9_single`, `P9_double` or `P9_tri
 
 or simply produce all the data at one:
 
-```
+ ```
  make run_all
  ```
  
