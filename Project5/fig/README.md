@@ -1,1 +1,1 @@
-## Folder for figures
+## Folder for figures and animations
