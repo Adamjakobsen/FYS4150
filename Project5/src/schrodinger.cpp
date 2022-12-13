@@ -116,18 +116,18 @@ void Schrodinger::set_A_B()
         B(k, k) = bk;
 
         if (i != 0)
-        { // lowermost diagonal
+        { // lowermost subdiagonal
             A(k, ij_k(i - 1, j)) = -r;
-            // uppermost diagonal
+            // uppermost subdiagonal
             A(ij_k(i - 1, j), k) = -r;
 
-            // lowermost diagonal
+            // lowermost subdiagonal
             B(k, ij_k(i - 1, j)) = r;
             // uppermost diagonal
             B(ij_k(i - 1, j), k) = r;
         }
         if (j != 0)
-        { //"Inner" diagonals
+        { //"Inner" subdiagonals
             A(k, ij_k(i, j - 1)) = -r;
             A(ij_k(i, j - 1), k) = -r;
 
